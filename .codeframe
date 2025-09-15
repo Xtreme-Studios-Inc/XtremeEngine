@@ -1,5 +1,5 @@
 {
-    "projectName": "GameEngine",
+    "projectName": "xrenderer",
     "appEntry": "src/main.cpp",
     "buildDir": "build",
     "libsDir": "libs",
@@ -7,8 +7,8 @@
         "build": "codeframe build",
         "build:release": "codeframe build -m=release",
         "clean:all": "clean m=all",
-        "debug:start": "./build/debug/GameEngine.exe",
-        "start": "./build/debug/GameEngine.exe"
+        "debug:start": "./build/debug/xrenderer.exe",
+        "start": "./build/debug/xrenderer.exe"
     },
     "dependencies": [
         {
@@ -19,18 +19,6 @@
             "outputType": "static",
             "options": {},
             "custom": true
-        },
-        {
-            "name": "raylib",
-            "libPath": "external/raylib",
-            "type": "library",
-            "linkType": "static",
-            "outputType": "static",
-            "options": {},
-            "libs": [
-                "raylib"
-            ],
-            "version": "5.5"
         },
         {
             "name": "vulkan",
@@ -125,8 +113,8 @@
         "bundlePath": "build/bundle",
         "resources": [
             {
-                "from": "./build/release/GameEngine.exe",
-                "to": "./bin/GameEngine.exe"
+                "from": "./build/release/xrenderer.exe",
+                "to": "./bin/xrenderer.exe"
             }
         ]
     },

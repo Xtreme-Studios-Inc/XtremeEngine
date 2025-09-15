@@ -8,9 +8,6 @@ Camera::Camera() {
     pitch = 0.0f;
 
     front = glm::vec3(0.0f, 0.0f, -1.0f);
-
-    moveSpeed = 2.0f;
-    turnSpeed = 8.0f;
 }
 
 // Making a camera with a new position and rotation
