@@ -131,7 +131,7 @@ void OpenGL_Renderer::draw() {
     glfwSwapBuffers(window);
 }
 
-void OpenGL_Renderer::shutdown_Renderer() {
+void OpenGL_Renderer::shutdownRenderer() {
     printf("Deleting Renderer\n");
 
 #if defined GUI_LAYER && defined OPENGL

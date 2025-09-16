@@ -1,5 +1,5 @@
 #pragma once
-// #include "CommonValues.h"
+// #include "common.h"
 // #include <GLEW/glew.h>
 #include <codeframe>
 
@@ -8,14 +8,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../../Window/GLFW_Window.h"
+#include "../../core/window.h"
 
-#include "../../AssetLoading/OpenGL_Assets/OpenGL_Assets.h"
-#include "../../Time.h"
+#include "../../asset-loading/OpenGL_Assets/OpenGL_Assets.h"
+#include "../../time.h"
 #include "../GUI_Renderer.h"
 #include "Shaders.h"
 
-#include "../../Camera.h"
+#include "../../core/camera.h"
 
 class OpenGL_Renderer {
   public:
@@ -30,7 +30,7 @@ class OpenGL_Renderer {
     Shaders *getShaders() { return &shaders; }
     glm::mat4 *getViewMatrix() { return shaders.ViewMatrix(); }
 
-    void shutdown_Renderer();
+    void shutdownRenderer();
 
   private:
     GLFWwindow *window;

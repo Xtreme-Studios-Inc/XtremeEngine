@@ -1,40 +1,38 @@
-#include "PreprocessorDefs.h"
-#include "Renderer/GUI_Renderer.h"
+#include "definitions.h"
+#include "renderer/GUI_Renderer.h"
 
 #ifdef VULKAN
-#include "Renderer/Vulkan_Renderer/Vulkan_Renderer.h"
-Vulkan_Renderer Renderer;
+#include "renderer/vulkan-renderer/vulkan-renderer.h"
+VulkanRenderer Renderer;
 #elif OPENGL
-#include "Renderer/OpenGL_Renderer/OpenGL_Renderer.h"
+#include "renderer/OpenGL_Renderer/OpenGL_Renderer.h"
 OpenGL_Renderer Renderer;
 #else
 #endif
 
-#include "Time.h"
+#include "core/time.h"
 
-Window newWindow;
-Time programTime;
+Window window;
+Time appTime;
 Camera camera;
 
 /**
  * The Entry Point
- * @author Andre Loubser
- *
  */
 int main() {
     // CREATE WINDOW
-    if (!newWindow.initWindow("WIN", 1920, 1080)) { // 1280, 720
+    if (!window.initWindow("WIN", 1920, 1080)) { // 1280, 720
         return EXIT_FAILURE;
     }
 
 #ifdef VULKAN
     // CREATE VULKAN INSTANCE -- needs the window so we get the window
-    if (Renderer.init_Vulkan_Renderer(newWindow.getWindow()) == EXIT_FAILURE) {
+    if (Renderer.initVulkanRenderer(window.getWindow()) == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
 #elif OPENGL
     // CREATE VULKAN INSTANCE -- needs the window so we get the window
-    if (Renderer.init_OpenGL_Renderer(newWindow.getWindow()) == EXIT_FAILURE) {
+    if (Renderer.init_OpenGL_Renderer(window.getWindow()) == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }
 #endif
@@ -47,23 +45,23 @@ int main() {
     int counter = 0;
 
     // PROGRAM LOOP
-    while (!newWindow.shouldClose()) {
+    while (!window.shouldClose()) {
         glfwPollEvents();
 
-        programTime.startTimeTracker();
+        appTime.startTimeTracker();
 
-        deltaTime = programTime.getDeltaTime();
-        programTime.getFps();
+        deltaTime = appTime.getDeltaTime();
+        appTime.getFps();
 
-        camera.checkInputs(newWindow.getCursorMode(), newWindow.getKeys(), newWindow.getScroll(), deltaTime);
-        camera.setCamera(newWindow.getCursorMode(), newWindow.cursorXChange(), newWindow.cursorYChange(), deltaTime);
+        camera.checkInputs(window.getCursorMode(), window.getKeys(), window.getScroll(), deltaTime);
+        camera.setCamera(window.getCursorMode(), window.cursorXChange(), window.cursorYChange(), deltaTime);
 
         Renderer.draw();
     }
 
     // CLEAN UP
-    Renderer.shutdown_Renderer();
+    Renderer.shutdownRenderer();
 
-    glfwDestroyWindow(newWindow.getWindow());
+    glfwDestroyWindow(window.getWindow());
     glfwTerminate();
 }

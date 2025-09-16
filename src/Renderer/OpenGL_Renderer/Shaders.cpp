@@ -50,7 +50,7 @@ void Shaders::CompileShaders() {
         printf("ERROR creating shader program!\n");
         return;
     }
-    // src/Renderer/OpenGL_Renderer/
+    // src/renderer/OpenGL_Renderer/
     std::vector<char> vShader = readShader(ASSETS / "Shaders/OpenGL_Shaders/vert.spv");
     std::vector<char> fShader = readShader(ASSETS / "Shaders/OpenGL_Shaders/frag.spv");
 

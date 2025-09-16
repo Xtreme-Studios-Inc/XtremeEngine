@@ -2,19 +2,17 @@
 
 #include <codeframe>
 
-#include "../CommonValues.h"
-
 #include <backends/imgui_impl_glfw.h>
 #include <imgui.h>
-// #include "../../vendor/ImGUI/imgui.h"
-// #include "../../vendor/ImGUI/imgui_impl_glfw.h"
+
+#include "../common.h"
 
 #ifdef VULKAN
 #include <backends/imgui_impl_vulkan.h>
-#include "../AssetLoading/Vulkan_Assets/Vulkan_Assets.h"
+#include "../asset-loading/vulkan-assets/vulkan-assets.h"
 #elif OPENGL
 #include <backends/imgui_impl_opengl3.h>
-#include "../AssetLoading/OpenGL_Assets/OpenGL_Assets.h"
+#include "../asset-loading/OpenGL_Assets/OpenGL_Assets.h"
 #endif
 
 class GUI_Renderer {

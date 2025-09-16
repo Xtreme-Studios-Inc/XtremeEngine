@@ -1,5 +1,5 @@
 {
-    "projectName": "xrenderer",
+    "projectName": "xengine",
     "appEntry": "src/main.cpp",
     "buildDir": "build",
     "libsDir": "libs",
@@ -7,8 +7,8 @@
         "build": "codeframe build",
         "build:release": "codeframe build -m=release",
         "clean:all": "clean m=all",
-        "debug:start": "./build/debug/xrenderer.exe",
-        "start": "./build/debug/xrenderer.exe"
+        "debug:start": "./build/debug/xengine.exe",
+        "start": "./build/debug/xengine.exe"
     },
     "dependencies": [
         {
@@ -113,8 +113,8 @@
         "bundlePath": "build/bundle",
         "resources": [
             {
-                "from": "./build/release/xrenderer.exe",
-                "to": "./bin/xrenderer.exe"
+                "from": "./build/release/xengine.exe",
+                "to": "./bin/xengine.exe"
             }
         ]
     },

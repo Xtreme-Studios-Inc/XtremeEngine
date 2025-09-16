@@ -4,15 +4,16 @@ ColumnLimit: 120
 IndentWidth: 4
 BinPackArguments: false
 BinPackParameters: false
+
 Cpp11BracedListStyle: true
 AlignArrayOfStructures: Left 
 
-SortIncludes: true
+SortIncludes: false
 IncludeBlocks: Preserve
-IncludeCategories:
-  - Regex: '^<[^"]*>'        # system headers
-    Priority: 1
-  - Regex: '^<codeframe>'    # external lib
-    Priority: 2
-  - Regex: '.*'              # everything else (project headers)
-    Priority: 3
+# IncludeCategories:
+#   - Regex: '^<[^"]*>'        # system headers
+#     Priority: 1
+#   - Regex: '^<codeframe>'    # external lib
+#     Priority: 2
+#   - Regex: '.*'              # everything else (project headers)
+#     Priority: 3

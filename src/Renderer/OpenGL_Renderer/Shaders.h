@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include "glad/glad.h"
 
-#include "../../AssetLoading/asset-constants.h"
+#include "../../asset-loading/asset-constants.h"
 
 class Shaders {
   public:
