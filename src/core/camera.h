@@ -18,7 +18,7 @@ class Camera {
 
     // Look Sensitivity
     // float mouseSensitivity = 20;
-    float mouseSensitivity = 0.06f;
+    float mouseSensitivity = 0.04f;
     // Camera Speed
     GLfloat moveSpeed = 4.0f;
     GLfloat turnSpeed = 16.0f;

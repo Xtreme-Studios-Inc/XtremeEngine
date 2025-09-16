@@ -49,20 +49,25 @@ void Camera::setCamera(bool cursorMode, GLfloat xChange, GLfloat yChange, float 
     if (cursorMode != false)
         return;
 
-    // Optional tiny smoothing (EMA); keeps feel crisp without lag
-    static float sx = 0.0f, sy = 0.0f;
-    const float alpha = 0.2f; // 0.15–0.3 is typical
-    sx = (1.0f - alpha) * sx + alpha * xChange;
-    sy = (1.0f - alpha) * sy + alpha * yChange;
+    // // Smoothing
+    // // Optional tiny smoothing (EMA); keeps feel crisp without lag
+    // static float sx = 0.0f, sy = 0.0f;
+    // const float alpha = 0.2f; // 0.15–0.3 is typical
+    // sx = (1.0f - alpha) * sx + alpha * xChange;
+    // sy = (1.0f - alpha) * sy + alpha * yChange;
 
-    // Optional tiny deadzone to kill sensor noise
-    auto dz = [](float v) { return (std::fabs(v) < 0.02f) ? 0.0f : v; };
-    float dx = dz(sx);
-    float dy = dz(sy);
+    // // Optional tiny deadzone to kill sensor noise
+    // auto dz = [](float v) { return (std::fabs(v) < 0.02f) ? 0.0f : v; };
+    // float dx = dz(sx);
+    // float dy = dz(sy);
 
-    // ✅ No dt here — use pure sensitivity
-    yaw += dx * mouseSensitivity;
-    pitch += dy * mouseSensitivity;
+    // // ✅ No dt here — use pure sensitivity
+    // yaw += dx * mouseSensitivity;
+    // pitch += dy * mouseSensitivity;
+
+    // ✅ Use raw deltas directly
+    yaw += xChange * mouseSensitivity;
+    pitch += yChange * mouseSensitivity;
 
     // Clamp pitch, wrap yaw (prevents precision drift)
     pitch = std::clamp(pitch, -89.0f, 89.0f);
@@ -96,6 +101,13 @@ void Camera::checkInputs(bool cursorMode, bool *keys, float scroll, GLfloat delt
     // move right
     if (keys[GLFW_KEY_D])
         newPos += right;
+
+    // move down
+    if (keys[GLFW_KEY_Q])
+        newPos -= worldUp;
+    // move up
+    if (keys[GLFW_KEY_E])
+        newPos += worldUp;
 
     position += (newPos * moveSpeed * scroll) * deltaTime;
 }
