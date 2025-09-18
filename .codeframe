@@ -131,7 +131,7 @@
     "systemLibs": [],
     "custom": {
         "compileFlags": [
-            "-DOPENGL",
+            "-DVULKAN",
             "-DGLFW_INCLUDE_NONE",
             "-DASSIMP_BUILD_ZLIB=OFF"
         ]
