@@ -7,8 +7,8 @@
 #include <assimp/scene.h>
 
 #include "../entity.h"
-#include "OpenGL_Mesh.h"
-#include "OpenGL_Texture.h"
+#include "opengl-mesh.h"
+#include "opengl-texture.h"
 
 class OpenGL_MeshModel : public Entity {
   public:
@@ -21,14 +21,14 @@ class OpenGL_MeshModel : public Entity {
     std::vector<std::string> *getChildren() { return &Children; }
     size_t getMeshCount() { return meshList.size(); }
     OpenGL_Mesh *getMesh(size_t index) { return &meshList.at(index); }
-    std::vector<std::string> LoadMaterials(const aiScene *Scene);
+    std::vector<std::string> loadMaterials(const aiScene *Scene);
 
     const std::vector<uint32_t> *getMeshToTex() const { return &meshToTex; }
     void setMeshToTex(int MeshIndex, int TexID) { meshToTex.at(MeshIndex) = TexID; }
     void resizeMeshToTex(size_t SIZE) { meshToTex.resize(SIZE); }
     // std::vector<OpenGL_Texture*> textureList;
   private:
-    void LoadNode(aiNode *node, const aiScene *scene);
+    void loadNode(aiNode *node, const aiScene *scene);
     void LoadMesh(aiMesh *mesh, const aiScene *scene);
 
     std::vector<std::string> Children;

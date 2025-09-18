@@ -10,10 +10,10 @@
 
 #include "../../core/window.h"
 
-#include "../../asset-loading/OpenGL_Assets/OpenGL_Assets.h"
+#include "../../asset-loading/opengl-assets/opengl-assets.h"
 #include "../../time.h"
-#include "../GUI_Renderer.h"
-#include "Shaders.h"
+#include "../gui-renderer.h"
+#include "shaders.h"
 
 #include "../../core/camera.h"
 
@@ -38,7 +38,7 @@ class OpenGL_Renderer {
     Shaders shaders;
 
   public:
-    OpenGL_Assets AssetManager;
+    OpenglAssets AssetManager;
 
     // OpenGL_GUI_Renderer GUI_Renderer;
     // std::vector<OpenGL_MeshModel*> modelList;

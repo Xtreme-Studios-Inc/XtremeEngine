@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma region Program Layers
+#pragma region    // App Layers
 #define GUI_LAYER // Game Engine GUI Layer
 
 // CHANGE BEFORE LAUNCH

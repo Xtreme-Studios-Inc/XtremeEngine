@@ -1,4 +1,4 @@
-﻿#include "GUI_Renderer.h"
+﻿#include "gui-renderer.h"
 #include <filesystem>
 #include <iostream>
 #include <math.h>
@@ -6,29 +6,29 @@
 #ifdef VULKAN
 
 GUI_Renderer::GUI_Renderer(GLFWwindow &window,
-                           VkInstance &newInstance,
-                           VkDevice &newDevice,
-                           VkPhysicalDevice &newPhysicalDevice,
-                           VkQueue &newQueue,
-                           uint32_t newGraphicsFamily,
-                           VkRenderPass &newRenderPass,
-                           VkCommandPool &newGraphicsCommandPool,
+                           VkInstance &instance,
+                           VkDevice &device,
+                           VkPhysicalDevice &physicalDevice,
+                           VkQueue &queue,
+                           uint32_t graphicsFamily,
+                           VkRenderPass &renderPass,
+                           VkCommandPool &graphicsCommandPool,
                            VkSampleCountFlagBits &msaaSampleCount,
-                           bool &ApplyGraphics,
-                           GraphicSettings &CurrentGraphicSettings,
+                           bool &applyGraphics,
+                           GraphicSettings &currentGraphicSettings,
                            Vulkan_Assets &assetManager) {
     IgInitInfo.mainWindow = &window;
-    IgInitInfo.instance = &newInstance;
-    IgInitInfo.Device = &newDevice;
-    IgInitInfo.PhysicalDevice = &newPhysicalDevice;
-    IgInitInfo.Queue = &newQueue;
-    IgInitInfo.GraphicsFamily = newGraphicsFamily;
-    IgInitInfo.RenderPass = &newRenderPass;
-    IgInitInfo.GraphicsCommandPool = &newGraphicsCommandPool;
+    IgInitInfo.instance = &instance;
+    IgInitInfo.Device = &device;
+    IgInitInfo.PhysicalDevice = &physicalDevice;
+    IgInitInfo.Queue = &queue;
+    IgInitInfo.GraphicsFamily = graphicsFamily;
+    IgInitInfo.RenderPass = &renderPass;
+    IgInitInfo.GraphicsCommandPool = &graphicsCommandPool;
 
     IgInitInfo.MsaaSampleCount = &msaaSampleCount;
-    IgInitInfo.ApplyGraphics = &ApplyGraphics;
-    IgInitInfo.CurrentGraphicSettings = &CurrentGraphicSettings;
+    IgInitInfo.ApplyGraphics = &applyGraphics;
+    IgInitInfo.CurrentGraphicSettings = &currentGraphicSettings;
 
     IgInitInfo.AssetManager = &assetManager;
     createImGuiInstance();
@@ -60,17 +60,12 @@ void GUI_Renderer::createImGuiInstance() {
 }
 
 // void ImGuiFontSubmit(VkDevice device, VkCommandPool commandPool, VkQueue queue) {
-
 //     // Upload Fonts
-
 //     // Use any command queue
 //     // vkResetCommandPool(device, commandPool, 0);
 //     VkCommandBuffer commandBuffer = beginCommandBuffer(device, commandPool);
-
 //     ImGui_ImplVulkan_CreateFontsTexture(commandBuffer);
-
 //     endAndSubmitCommandBuffer(device, commandPool, queue, commandBuffer);
-
 //     // ImGui_ImplVulkan_DestroyFontUploadObjects();
 // }
 
@@ -134,7 +129,7 @@ void GUI_Renderer::init_imGUI_Vulkan() {
 }
 
 #elif OPENGL
-GUI_Renderer::GUI_Renderer(GLFWwindow &window, bool &ApplyGraphics, OpenGL_Assets &AssetManager) {
+GUI_Renderer::GUI_Renderer(GLFWwindow &window, bool &ApplyGraphics, OpenglAssets &AssetManager) {
     IgInitInfo.mainWindow = &window;
 
     IgInitInfo.ApplyGraphics = &ApplyGraphics;
@@ -178,7 +173,7 @@ void GUI_Renderer::createImGuiInstance() {
 // TODO : Function to handle shortcuts for selected window
 // void GUI_Renderer::ShortCutKeyInput(){}
 
-#pragma region Main Bar
+#pragma region // Main Bar
 
 void GUI_Renderer::MainMenuBar() {
     if (ImGui::BeginMainMenuBar()) {
@@ -298,7 +293,7 @@ void GUI_Renderer::ShowFileMenu() {
 #pragma region // Outliner
 
 // All active rendered meshes
-void GUI_Renderer::RenderOutlinerMenu() {
+void GUI_Renderer::renderOutlinerMenu() {
 
     ImGui::Begin("World Outliner");
 
@@ -310,14 +305,14 @@ void GUI_Renderer::RenderOutlinerMenu() {
         //     if (nameString == "") {
         //         continue;
         //     }
-        //     ShowOutlinerTree(nameString.c_str(), obj_i);
+        //     showOutlinerTree(nameString.c_str(), obj_i);
         // }
         size_t outlinerIndex = 0;
         for (const string &modelName : *sharedInfo.allAssets->ModelNames) {
             if (modelName == "") {
                 continue;
             }
-            ShowOutlinerTree(modelName.c_str(), outlinerIndex);
+            showOutlinerTree(modelName.c_str(), outlinerIndex);
 
             ++outlinerIndex;
         }
@@ -327,10 +322,11 @@ void GUI_Renderer::RenderOutlinerMenu() {
     ImGui::End();
 }
 
-void GUI_Renderer::ShowOutlinerTree(const char *prefix, int uid) {
+void GUI_Renderer::showOutlinerTree(const char *prefix, int uid) {
     // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
     ImGui::PushID(uid);
-    static int ID = 0;
+    // static int ID = 0;
+
     // Text and Tree nodes are less high than framed widgets, using AlignTextToFramePadding() we add vertical spacing to
     // make the tree lines equal high.
     ImGui::TableNextRow();
@@ -344,11 +340,11 @@ void GUI_Renderer::ShowOutlinerTree(const char *prefix, int uid) {
 
     if (ImGui::IsItemClicked(0) && !node_open) {
         *sharedInfo.selectedObject = uid;
-        printf("Select Object");
+        console.logLn("Select Object");
     }
 
-    if (ImGui::IsAnyMouseDown && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoHoldToOpenOthers |
-                                                            ImGuiDragDropFlags_SourceAllowNullID)) {
+    if (ImGui::IsAnyMouseDown() && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoHoldToOpenOthers |
+                                                              ImGuiDragDropFlags_SourceAllowNullID)) {
         ImGui::SetDragDropPayload(prefix, NULL, 0);
         ImGui::Text("This is a drag and drop source");
         ImGui::EndDragDropSource();
@@ -362,9 +358,9 @@ void GUI_Renderer::ShowOutlinerTree(const char *prefix, int uid) {
 
         if (ImGui::Button("Delete")) {
 #ifdef VULKAN
-            IgInitInfo.AssetManager->destroyVulkan_MeshModel(uid);
+            IgInitInfo.AssetManager->destroyVulkanMeshModel(uid);
 #elif OPENGL
-            IgInitInfo.AssetManager->destroyOpenGL_MeshModel(uid);
+            IgInitInfo.AssetManager->destroyOpenGLMeshModel(uid);
 #endif
         }
 
@@ -379,7 +375,7 @@ void GUI_Renderer::ShowOutlinerTree(const char *prefix, int uid) {
         for (int i = 0; i < ChildNodes.size(); i++) {
             ImGui::PushID(i); // Use field index as identifier.
             if (i < 20) {
-                ShowOutlinerTree(ChildNodes.at(i).c_str(), i);
+                showOutlinerTree(ChildNodes.at(i).c_str(), i);
             } else {
                 // Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
                 ImGui::TableNextRow();
@@ -402,7 +398,7 @@ void GUI_Renderer::ShowOutlinerTree(const char *prefix, int uid) {
 // Entiy Has Transform
 void Entity_Details() {}
 
-void GUI_Renderer::RenderDetailsMenu() {
+void GUI_Renderer::renderDetailsMenu() {
     ImGui::Begin("Details");
 
     // Transform
@@ -436,7 +432,7 @@ void GUI_Renderer::RenderDetailsMenu() {
     // Graphics Settings
     if (ImGui::CollapsingHeader("Graphics")) {
 #ifdef VULKAN
-        static int MSAA;
+        // static int MSAA;
         ImGui::InputInt("MSAA", &IgInitInfo.CurrentGraphicSettings->MSAA, 1, 1);
 
         if (ImGui::Button("Apply")) {
@@ -454,7 +450,7 @@ void GUI_Renderer::RenderDetailsMenu() {
 
 #pragma region // Content Browser
 
-void GUI_Renderer::RenderContentMenu() {
+void GUI_Renderer::renderContentMenu() {
 
 #define MODELS_FOLDER 0   // Folder 0
 #define TEXTURES_FOLDER 1 // Folder 1
@@ -522,7 +518,7 @@ void GUI_Renderer::RenderContentMenu() {
 
 #pragma endregion
 
-void GUI_Renderer::RenderStatsOverlay() {
+void GUI_Renderer::renderStatsOverlay() {
     const float PAD = 10.0f;
     static int corner = 0;
     ImGuiIO &io = ImGui::GetIO();
@@ -573,20 +569,23 @@ void GUI_Renderer::RenderStatsOverlay() {
     ImGui::End();
 }
 
-#pragma region Clean-Up Functions
-// Secondly Destroys
-void GUI_Renderer::CleanUpGUI() {
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
+#pragma region // Clean-Up Functions
 // First Destroys
 void GUI_Renderer::CleanUpGuiComponents() {
+    if (!ImGui::GetCurrentContext())
+        return;
 #ifdef VULKAN
-    // ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplVulkan_Shutdown();
     vkDestroyDescriptorPool(*IgInitInfo.Device, imguiPool, nullptr);
 #elif OPENGL
     ImGui_ImplOpenGL3_Shutdown();
 #endif
 }
+
+// Secondly Destroys
+void GUI_Renderer::CleanUpGUI() {
+    ImGui_ImplGlfw_Shutdown(); // 2) platform backend
+    ImGui::DestroyContext();   // 3) ImGui context
+}
+
 #pragma endregion

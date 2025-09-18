@@ -1,12 +1,14 @@
 #pragma once
-// #include <GLEW/glew.h>
+
+#include <codeframe>
+
 #include <stb_image.h>
 #include "glad/glad.h"
 
 class OpenGL_Texture {
   public:
     OpenGL_Texture();
-    OpenGL_Texture(const char *fileLoc);
+    OpenGL_Texture(const fs::path &fileLocation);
     ~OpenGL_Texture();
 
     bool LoadTexture();
@@ -18,5 +20,5 @@ class OpenGL_Texture {
     GLuint textureID;
     int width, height, bitDepth;
 
-    char *fileLocation;
+    fs::path fileLocation;
 };

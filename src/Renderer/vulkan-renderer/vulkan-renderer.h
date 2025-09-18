@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "../../ProgramLayers/ProgramLayers.h"
+#include "../../core/app-layers.h"
 #include "../../asset-loading/vulkan-assets/vulkan-assets.h"
-#include "../GUI_Renderer.h"
+#include "../gui-renderer.h"
 #include "../../core/window.h"
 #include "../../core/camera.h"
 

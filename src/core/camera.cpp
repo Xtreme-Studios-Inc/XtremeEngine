@@ -86,26 +86,26 @@ void Camera::checkInputs(bool cursorMode, bool *keys, float scroll, GLfloat delt
         return;
     }
     glm::vec3 newPos = glm::vec3(0.0f, 0.0f, 0.0f);
-    // move forward
+    // forward
     if (keys[GLFW_KEY_W])
         newPos += front;
 
-    // move back
+    // back
     if (keys[GLFW_KEY_S])
         newPos -= front;
 
-    // move left
+    // left
     if (keys[GLFW_KEY_A])
         newPos -= right;
 
-    // move right
+    // right
     if (keys[GLFW_KEY_D])
         newPos += right;
 
-    // move down
+    // down
     if (keys[GLFW_KEY_Q])
         newPos -= worldUp;
-    // move up
+    // up
     if (keys[GLFW_KEY_E])
         newPos += worldUp;
 

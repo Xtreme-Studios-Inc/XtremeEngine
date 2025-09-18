@@ -1,4 +1,4 @@
-#include "OpenGL_Renderer.h"
+#include "opengl-renderer.h"
 
 #pragma region Public Functions
 
@@ -63,7 +63,7 @@ void GLMmovements(OpenGL_MeshModel mod, GLuint MVPuniform, int modelIndex, const
 
 void OpenGL_Renderer::draw() {
     if (AssetManager.Load_Model_Files) {
-        AssetManager.createOpenGL_MeshModel();
+        AssetManager.createOpenGLMeshModel();
     }
 
 #if defined GUI_LAYER && defined OPENGL
@@ -80,18 +80,15 @@ void OpenGL_Renderer::draw() {
     {
         GLMmovements(
             AssetManager.MeshModelList[i], shaders.getMvpLocation(), 0, shaders); // This sets the model Uniform
-        // AssetManager.OpenGL_MeshModelList[i].RenderModel();
+
         auto currModel = AssetManager.MeshModelList[i];
         for (size_t i = 0; i < currModel.getMeshCount(); i++) {
-
             uint32_t materialIndex = currModel.getMeshToTex()->at(i); // meshToTex[i];
 
-            if (materialIndex < AssetManager.textureList.size() &&
-                &AssetManager.textureList[materialIndex] != nullptr) {
+            if (materialIndex < AssetManager.textureList.size()) {
                 AssetManager.textureList[materialIndex].UseTexture();
             }
 
-            // currModel.meshList[i].renderMesh();
             currModel.getMesh(i)->renderMesh();
         }
     }
@@ -117,12 +114,12 @@ void OpenGL_Renderer::draw() {
     } else {
         mesh = nullptr;
     }
-    new_GUI_Renderer.RenderMenus<OpenGL_Assets::AllAssets *>(mesh->getTransformType(),
-                                                             mesh->getPosition(),
-                                                             mesh->getRotation(),
-                                                             mesh->getScale(),
-                                                             AssetManager.SetSelected(),
-                                                             AssetManager.getAssetInfo());
+    new_GUI_Renderer.RenderMenus<OpenglAssets::AllAssets *>(mesh->getTransformType(),
+                                                            mesh->getPosition(),
+                                                            mesh->getRotation(),
+                                                            mesh->getScale(),
+                                                            AssetManager.SetSelected(),
+                                                            AssetManager.getAssetInfo());
     // The ImGUI Function That Renders The GUI
     if (ImGui::GetCurrentContext())
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

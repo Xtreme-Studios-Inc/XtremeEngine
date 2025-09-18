@@ -1,4 +1,4 @@
-#include "OpenGL_MeshModel.h"
+#include "opengl-mesh-model.h"
 
 void OpenGL_MeshModel::LoadModel(/*const std::string& fileName*/ const aiScene *scene) {
     /*Assimp::Importer importer;
@@ -14,17 +14,17 @@ void OpenGL_MeshModel::LoadModel(/*const std::string& fileName*/ const aiScene *
             printf("Model (%s) loaded successfully: %s", fileName.c_str());
     }*/
 
-    LoadNode(scene->mRootNode, scene);
+    loadNode(scene->mRootNode, scene);
 
-    // LoadMaterials(scene);
+    // loadMaterials(scene);
 }
 
-void OpenGL_MeshModel::LoadNode(aiNode *node, const aiScene *scene) {
+void OpenGL_MeshModel::loadNode(aiNode *node, const aiScene *scene) {
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         LoadMesh(scene->mMeshes[node->mMeshes[i]], scene);
     }
     for (size_t i = 0; i < node->mNumChildren; i++) {
-        LoadNode(node->mChildren[i], scene);
+        loadNode(node->mChildren[i], scene);
     }
 }
 
@@ -56,7 +56,7 @@ void OpenGL_MeshModel::LoadMesh(aiMesh *mesh, const aiScene *scene) {
     meshToTex.push_back(mesh->mMaterialIndex - 1); // Note - 1 because we need index, otherwise it returns size I guess
 }
 
-std::vector<std::string> OpenGL_MeshModel::LoadMaterials(const aiScene *scene) {
+std::vector<std::string> OpenGL_MeshModel::loadMaterials(const aiScene *scene) {
     std::vector<std::string> textures;
     textures.resize(scene->mNumMaterials);
 

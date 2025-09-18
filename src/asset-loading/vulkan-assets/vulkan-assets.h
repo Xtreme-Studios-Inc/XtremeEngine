@@ -4,7 +4,7 @@
 #include <mutex>
 #include <thread>
 
-#include "../../common.h"
+#include "../../core/common.h"
 #include "../asset-constants.h"
 #include "../lights/directional-light.h"
 #include "vulkan-mesh-model.h"
@@ -32,12 +32,12 @@ class Vulkan_Assets {
     // Models
     int *SetSelected() { return &selectedModel; }
 
-    int createVulkan_MeshModel(fs::path modelPath);
-    void destroyVulkan_MeshModel(int MeshId);
+    int createVulkanMeshModel(fs::path modelPath);
+    void destroyVulkanMeshModel(int MeshId);
 
     // Scene Objects
     std::vector<std::string> MeshModelNames;
-    std::vector<Vulkan_MeshModel> MeshModelList;
+    std::vector<VulkanMeshModel> MeshModelList;
 
     // Textures
     uint16_t addTexture(std::string fileName);
@@ -60,7 +60,7 @@ class Vulkan_Assets {
     // Other
     struct AllAssets {
         std::vector<std::string> *ModelNames{};
-        std::vector<Vulkan_MeshModel> *modelPointers{};
+        std::vector<VulkanMeshModel> *modelPointers{};
         std::vector<Vulkan_Texture> *texturePointers{};
         AllLights *lightPointers{};
     } allAssets;

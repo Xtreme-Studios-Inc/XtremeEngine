@@ -47,7 +47,7 @@ void Vulkan_Assets::asyncAssets(const fs::path &ModelPath) {
 
     if (!Load_Model_Files) {
 
-        // Read Vulkan_MeshModel from file to ADD model
+        // Read VulkanMeshModel from file to ADD model
         path = ModelPath;
         bool ShouldRead = true;
         for (size_t i = 0; i < MeshModelNames.size(); i++) {
@@ -93,15 +93,15 @@ void Vulkan_Assets::createAsset(const fs::path &ModelPath) {
 #pragma endregion
 
 // Model Loading
-int Vulkan_Assets::createVulkan_MeshModel(fs::path modelPath) {
+int Vulkan_Assets::createVulkanMeshModel(fs::path modelPath) {
     static std::mutex lockFuncM; // Making a static mutex
 
     if (!lockFuncM.try_lock()) {
         return 1;
     } // Thread tries to lock function
 
-    printf("creating: %s\n", modelPath.c_str());
-    Vulkan_MeshModel model = Vulkan_MeshModel();
+    printf("creating: %s\n", modelPath.generic_string().c_str());
+    VulkanMeshModel model = VulkanMeshModel();
 
     // Checks if model already exists
     for (size_t i = 0; i < MeshModelNames.size(); i++) {
@@ -122,7 +122,7 @@ int Vulkan_Assets::createVulkan_MeshModel(fs::path modelPath) {
     }
 
     /*
-            #pragma region Read Vulkan_MeshModel from file
+            #pragma region Read VulkanMeshModel from file
 
             // Import "scene" with multiple meshes
             double StartTime = glfwGetTime();
@@ -139,7 +139,7 @@ int Vulkan_Assets::createVulkan_MeshModel(fs::path modelPath) {
 
             #pragma endregion*/
 
-    std::vector<std::string> textureNames = model.LoadMaterials(scene);
+    std::vector<std::string> textureNames = model.loadMaterials(scene);
 
     std::vector<uint16_t> matToTex;
     if (textureNames.size() > 0) {
@@ -162,7 +162,7 @@ int Vulkan_Assets::createVulkan_MeshModel(fs::path modelPath) {
     }
 
     // And save
-    model.LoadNode(PhysicalDevice, Device, TransferQueue, GraphicsCommandPool, scene->mRootNode, scene, matToTex);
+    model.loadNode(PhysicalDevice, Device, TransferQueue, GraphicsCommandPool, scene->mRootNode, scene, matToTex);
 
     MeshModelList.push_back(model);
     // This gets the model name without the entire Path and adds it to the list of names
@@ -174,7 +174,7 @@ int Vulkan_Assets::createVulkan_MeshModel(fs::path modelPath) {
     return 0;
 }
 
-void Vulkan_Assets::destroyVulkan_MeshModel(int ModelID) {
+void Vulkan_Assets::destroyVulkanMeshModel(int ModelID) {
     vkDeviceWaitIdle(*Device);
     MeshModelList.at(ModelID).destroyModel();
     MeshModelNames.at(ModelID) = "";

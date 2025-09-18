@@ -7,29 +7,29 @@
 #include <thread>
 
 #include "../asset-constants.h"
-#include "OpenGL_MeshModel.h"
-#include "OpenGL_Texture.h"
+#include "opengl-mesh-model.h"
+#include "opengl-texture.h"
 // #include "lights/directional-light.h"
 // #include "PointLight.h"
 // #include "SpotLight.h"
 
-class OpenGL_Assets {
+class OpenglAssets {
   public:
     std::vector<Assimp::Importer *> importer;
     std::vector<const aiScene *> addedModels;
     bool Load_Model_Files = false; // TODO
     std::vector<fs::path> addedModelPaths;
 
-    OpenGL_Assets() = default;
+    OpenglAssets() = default;
 
     void asyncAssets(fs::path ModelPath);
     void createAsset(fs::path ModelPath);
 
-#pragma region 3D Models
+#pragma region // 3D Models
     int *SetSelected() { return &selectedModel; }
 
-    int createOpenGL_MeshModel();
-    void destroyOpenGL_MeshModel(int MeshId);
+    int createOpenGLMeshModel();
+    void destroyOpenGLMeshModel(int MeshId);
 
     // Scene Objects
     std::vector<std::string> MeshModelNames;

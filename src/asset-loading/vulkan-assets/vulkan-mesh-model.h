@@ -6,46 +6,46 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-class Vulkan_MeshModel : public Entity {
+class VulkanMeshModel : public Entity {
   public:
-    Vulkan_MeshModel();
-    ~Vulkan_MeshModel() = default;
+    VulkanMeshModel();
+    ~VulkanMeshModel() = default;
 
     size_t getMeshCount();
 
-    Vulkan_Mesh *getMesh(size_t index);
+    VulkanMesh *getMesh(size_t index);
 
-    std::vector<std::string> LoadMaterials(const aiScene *scene);
+    vector<string> loadMaterials(const aiScene *scene);
 
-    std::vector<Vulkan_Mesh> LoadNode(VkPhysicalDevice *newPhysicalDevice,
-                                      VkDevice *newDevice,
-                                      VkQueue *transferQueue,
-                                      VkCommandPool *transferCommandPool,
-                                      aiNode *node,
-                                      const aiScene *scene,
-                                      std::vector<uint16_t> matToTex);
+    vector<VulkanMesh> loadNode(VkPhysicalDevice *newPhysicalDevice,
+                                VkDevice *newDevice,
+                                VkQueue *transferQueue,
+                                VkCommandPool *transferCommandPool,
+                                aiNode *node,
+                                const aiScene *scene,
+                                vector<uint16_t> matToTex);
 
-    Vulkan_Mesh *LoadMesh(VkPhysicalDevice newPhysicalDevice,
-                          VkDevice newDevice,
-                          VkQueue transferQueue,
-                          VkCommandPool transferCommandPool,
-                          aiMesh *mesh,
-                          const aiScene *scene,
-                          std::vector<uint16_t> matToTex);
+    VulkanMesh *LoadMesh(VkPhysicalDevice newPhysicalDevice,
+                         VkDevice newDevice,
+                         VkQueue transferQueue,
+                         VkCommandPool transferCommandPool,
+                         aiMesh *mesh,
+                         const aiScene *scene,
+                         vector<uint16_t> matToTex);
 
-    std::vector<std::string> *getChildren() { return &Children; }
+    vector<string> *getChildren() { return &Children; }
     bool getState() { return DESTROYED; }
     void makeInstance() { MODEL_INSTANCE = true; }
 
     void destroyModel();
 
   private:
-    std::vector<std::string> Children;
+    vector<string> Children;
 
     bool MODEL_INSTANCE = false;
     bool DESTROYED = false;
 
-    std::vector<Vulkan_Mesh> MeshList;
+    vector<VulkanMesh> MeshList;
 
-    std::vector<int> TextureMap;
+    vector<int> TextureMap;
 };

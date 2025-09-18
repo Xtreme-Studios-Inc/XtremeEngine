@@ -174,7 +174,7 @@ int VulkanRenderer::initVulkanRenderer(GLFWwindow *newWindow) {
 void VulkanRenderer::draw() {
 
 #if defined GUI_LAYER && defined VULKAN
-    Vulkan_MeshModel *mesh;
+    VulkanMeshModel *mesh;
     if (AssetManager.MeshModelList.size() > 0) {
         AssetManager.MeshModelList[*AssetManager.SetSelected()].updateMatrix();
         // Referense to selected mesh
@@ -182,7 +182,7 @@ void VulkanRenderer::draw() {
     } else {
         mesh = nullptr;
     }
-    Vulkan_Assets::AllAssets *Assets = AssetManager.getAssetInfo();
+    // Vulkan_Assets::AllAssets *Assets = AssetManager.getAssetInfo();
     GUI.RenderMenus<Vulkan_Assets::AllAssets *>(mesh->getTransformType(),
                                                 mesh->getPosition(),
                                                 mesh->getRotation(),
@@ -190,13 +190,11 @@ void VulkanRenderer::draw() {
                                                 AssetManager.SetSelected(),
                                                 AssetManager.getAssetInfo());
 
-    // VulkanRenderer.AssetManager.MeshModelList[SelectedMesh].updateMatrix();
-
     clearColor = GUI.clearColor;
 #endif
 
     if (AssetManager.Load_Model_Files) { // TODO
-        AssetManager.createVulkan_MeshModel(AssetManager.path.generic_string());
+        AssetManager.createVulkanMeshModel(AssetManager.path.generic_string());
     }
 
 #pragma region // Get Available Image
@@ -304,18 +302,6 @@ void VulkanRenderer::draw() {
 void VulkanRenderer::shutdownRenderer() {
     vkDeviceWaitIdle(mainDevice.logicalDevice);
 
-// Clean Up GUI
-#if defined GUI_LAYER && defined VULKAN
-    GUI.CleanUpGUI(/*mainDevice.logicalDevice*/);
-#else
-    printf("GUI DISABLED");
-#endif
-
-    /*for (size_t i = 0; i < MeshModelList.size(); i++)
-    {
-            MeshModelList[i].destroyModel();
-    }*/
-
     vkDestroyDescriptorPool(mainDevice.logicalDevice, samplerDescriptorPool, nullptr);
     vkDestroyDescriptorSetLayout(mainDevice.logicalDevice, samplerSetLayout, nullptr);
 
@@ -323,12 +309,6 @@ void VulkanRenderer::shutdownRenderer() {
 
     // Texture Images & DestroyModels
     AssetManager.cleanUpAssets();
-    /*for (size_t i = 0; i < textureImages.size(); i++)
-    {
-            vkDestroyImageView(mainDevice.logicalDevice, textureImageViews[i], nullptr);
-            vkDestroyImage(mainDevice.logicalDevice, textureImages[i], nullptr);
-            vkFreeMemory(mainDevice.logicalDevice, textureImageMemory[i], nullptr);
-    }*/
 
     // Depth buffer Image
 
@@ -338,18 +318,32 @@ void VulkanRenderer::shutdownRenderer() {
         vkDestroyBuffer(mainDevice.logicalDevice, uniformBuffer[i], nullptr);
         vkFreeMemory(mainDevice.logicalDevice, uniformBufferMemory[i], nullptr);
     }
-    /*for (size_t i = 0; i < meshList.size(); i++)
-    {
-            meshList[i].destroyBuffers();
-    }*/
 
     for (size_t i = 0; i < MAX_FRAME_DRAWS; i++) {
-        vkDestroySemaphore(mainDevice.logicalDevice, renderFinished[i], nullptr);
-        vkDestroySemaphore(mainDevice.logicalDevice, imageAvailable[i], nullptr);
-        vkDestroyFence(mainDevice.logicalDevice, drawFences[i], nullptr);
+        if (imageAvailable[i]) {
+            vkDestroySemaphore(mainDevice.logicalDevice, imageAvailable[i], nullptr);
+            imageAvailable[i] = VK_NULL_HANDLE;
+        }
+        if (drawFences[i]) {
+            vkDestroyFence(mainDevice.logicalDevice, drawFences[i], nullptr);
+            drawFences[i] = VK_NULL_HANDLE;
+        }
+    }
+
+    for (size_t i = 0; i < renderFinished.size(); i++) {
+        if (renderFinished[i]) {
+            vkDestroySemaphore(mainDevice.logicalDevice, renderFinished[i], nullptr);
+            renderFinished[i] = VK_NULL_HANDLE;
+        }
     }
 
     cleanUpSwapChain();
+    // Clean Up GUI
+#if defined GUI_LAYER && defined VULKAN
+    GUI.CleanUpGUI(/*mainDevice.logicalDevice*/);
+#else
+    printf("GUI DISABLED");
+#endif
     vkDestroyCommandPool(mainDevice.logicalDevice, graphicsCommandPool, nullptr);
 
     vkDestroySurfaceKHR(Instance, Surface, nullptr);    // DESTROY SURFACE
@@ -363,15 +357,12 @@ void VulkanRenderer::shutdownRenderer() {
 
 // CREATE A NEW INSTANCE
 void VulkanRenderer::createInstance() {
-#pragma region Validation Layers
+
     if (enableValidationLayers && !checkValidationLayerSupport()) {
         throw std::runtime_error("validation layers requested, but not available!");
     }
-#pragma endregion
 
-#pragma region App Info
-
-    // INFO ABOUT THE APPLICATION ITSELF
+    // App Info
     // MOST DATA HERE DOESN'T AFFECT THE PROGRAM AND IS FOR DEVELOPER CONVENIENCE
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -381,16 +372,14 @@ void VulkanRenderer::createInstance() {
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.apiVersion = VK_API_VERSION_1_2;
 
-#pragma endregion
-
-#pragma region Instance Create Info	- [AppInfo, checkInstanceExtensionSupport]
+#pragma region // Instance Create Info	- [AppInfo, checkInstanceExtensionSupport]
 
     // CREATION INFORMATION FOR A VULKAN INSTANCE
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo; //	-- APP INFO
 
-#pragma region Get GLFW Extensions
+#pragma region // Get GLFW Extensions
 
     // Create list to hold instance extensions
     std::vector<const char *> instanceExtensions = std::vector<const char *>();
@@ -423,16 +412,12 @@ void VulkanRenderer::createInstance() {
 
 #pragma endregion
 
-#pragma region Create Instance - [CreateInfo] [&instance]
-
     // CREATE INSTANCE
     VkResult result = vkCreateInstance(&createInfo, nullptr, &Instance);
 
     if (result != VK_SUCCESS) {
         throw std::runtime_error("FAILED TO CREATE A VULKAN INSTANCE");
     }
-
-#pragma endregion
 }
 
 // CHECK IF ALL INSTANCE EXTENSIONS ARE SUPPORTED
@@ -464,7 +449,6 @@ bool VulkanRenderer::checkInstanceExtensionsSupport(std::vector<const char *> *c
 
 // CREATE SURFUCE ON WHICH WE CAN RENDER
 void VulkanRenderer::createSurface() {
-    // creating a surface (returns result)
     VkResult result = glfwCreateWindowSurface(Instance, window, nullptr, &Surface);
 
     if (result != VK_SUCCESS) {
@@ -501,18 +485,14 @@ void VulkanRenderer::getPhysicalDevice() {
 
 // CHECK IF THE GPU DEVICE IS SUITABLE FOR VULKAN
 bool VulkanRenderer::checkDeviceSuitable(VkPhysicalDevice device) {
-/*
-//INFO about the device itself (ID , name , type , vendor, ect)
-VkPhysicalDeviceProperties deviceProperties;
-vkGetPhysicalDeviceProperties(device, &deviceProperties);
-*/
-// Info about what the device can do (geomentry shader , tesselation shader, wide lines ,ect)
-#pragma region // Validate Features
 
+    // // INFO about the device itself (ID , name , type , vendor, ect)
+    // VkPhysicalDeviceProperties deviceProperties;
+    // vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+    // Validate Features
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
-#pragma endregion
 
     bool extensionsSupported = checkDeviceExtensionSupport(device);
     indices = getQueueFamilies(device);
@@ -783,13 +763,6 @@ void VulkanRenderer::createSwapChain() {
 
     imagesInFlight.assign(swapChainImages.size(), VK_NULL_HANDLE);
 
-    // if you use one renderFinished semaphore per image:
-    renderFinished.resize(swapChainImages.size());
-    for (size_t i = 0; i < renderFinished.size(); ++i) {
-        VkSemaphoreCreateInfo ci{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
-        vkCreateSemaphore(mainDevice.logicalDevice, &ci, nullptr, &renderFinished[i]);
-    }
-
 #pragma endregion
 }
 
@@ -1050,7 +1023,7 @@ void VulkanRenderer::createDescriptorSetLayouts() {
     }
 #pragma endregion
 
-#pragma region Sampler Descriptor Set Layout
+#pragma region // Sampler Descriptor Set Layout
     // CREATE TEXTURE SAMPLER DESCRIPTOR SET LAYOUT
     VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
     samplerLayoutBinding.binding = 0;
@@ -1079,12 +1052,12 @@ void VulkanRenderer::createPushConstantRange() {
 }
 #pragma endregion
 
-#pragma region Descriptor Set Allocation [createUniformBuffers(), createDescriptorPool(), allocateDescriptorSets()]
+#pragma region // Descriptor Set Allocation [createUniformBuffers(), createDescriptorPool(), allocateDescriptorSets()]
 // UniformBuffers are buffers in memory that is made accesible in read only format to shaders, so the shaders can read
 // constant parameter data
 void VulkanRenderer::createUniformBuffers() // Need to bind Descriptor Sets with Uniform Buffer
 {
-#pragma region Create Uniform Buffer for Every swapChainImage
+#pragma region // Create Uniform Buffer for Every swapChainImage
     // Buffer size will be size of all Uniform Buffer Object variables
     VkDeviceSize bufferSize = sizeof(UboViewProjection) + sizeof(Vulkan_Assets::AllLights);
 
@@ -1108,7 +1081,7 @@ void VulkanRenderer::createUniformBuffers() // Need to bind Descriptor Sets with
 // Descriptor Pools are used to allocate Descriptor sets from
 void VulkanRenderer::createDescriptorPool() // Allocated from pool so we Create a Pool
 {
-#pragma region Create Decriptor Pool to Allocate Descriptor Sets from
+#pragma region // Create Decriptor Pool to Allocate Descriptor Sets from
 
     VkDescriptorPoolSize vpPoolSize = {};
     vpPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1132,7 +1105,7 @@ void VulkanRenderer::createDescriptorPool() // Allocated from pool so we Create 
 
 #pragma endregion
 
-#pragma region Sampler Descriptor Pool
+#pragma region // Sampler Descriptor Pool
 
     // Texture sampler pool
     VkDescriptorPoolSize samplerPoolSize = {};
@@ -1158,7 +1131,7 @@ void VulkanRenderer::createDescriptorPool() // Allocated from pool so we Create 
 // Allocates DescriptorSets from DescriptorPool and binds the Sets to the UniformBuffers
 void VulkanRenderer::allocateDescriptorSets() // Allocate Descriptor Sets and then Bind them with Uniform Buffer
 {
-#pragma region Allocate Descriptor Sets
+#pragma region // Allocate Descriptor Sets
     // Resize Descriptor Set list so one for every buffer
     descriptorSets.resize(uniformBuffer.size());
 
@@ -1181,7 +1154,7 @@ void VulkanRenderer::allocateDescriptorSets() // Allocate Descriptor Sets and th
     }
 #pragma endregion
 
-#pragma region Bind Buffers to Descriptor Sets
+#pragma region // Bind Buffers to Descriptor Sets
     for (size_t i = 0; i < uniformBuffer.size(); i++) {
         // Buffer info and data offset
         VkDescriptorBufferInfo vpBufferInfo = {};
@@ -1235,17 +1208,15 @@ void VulkanRenderer::createGraphicsPipeline() {
     VkShaderModule vertexShaderModule = createShaderModule(vertexShaderCode);
     VkShaderModule fragmentShaderModule = createShaderModule(fragmentShaderCode);
 
-#pragma region Vertex Shader Create Info
-    VkPipelineShaderStageCreateInfo vertexShaderCreateInfo = {};
-    vertexShaderCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+#pragma region // Vertex Shader Create Info
+    VkPipelineShaderStageCreateInfo vertexShaderCreateInfo = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
     vertexShaderCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
     vertexShaderCreateInfo.module = vertexShaderModule;
     vertexShaderCreateInfo.pName = "main";
 #pragma endregion
 
-#pragma region Fragment Shader Create Info
-    VkPipelineShaderStageCreateInfo fragmentShaderCreateInfo = {};
-    fragmentShaderCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+#pragma region // Fragment Shader Create Info
+    VkPipelineShaderStageCreateInfo fragmentShaderCreateInfo = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
     fragmentShaderCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
     fragmentShaderCreateInfo.module = fragmentShaderModule;
     fragmentShaderCreateInfo.pName = "main";
@@ -1293,8 +1264,8 @@ void VulkanRenderer::createGraphicsPipeline() {
 
 #pragma region Vertex Input
     // -- Vertex Input --
-    VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo = {};
-    vertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
     vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
     vertexInputCreateInfo.pVertexBindingDescriptions = &bindingDescription;
     vertexInputCreateInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescription.size());
@@ -1325,8 +1296,7 @@ void VulkanRenderer::createGraphicsPipeline() {
     scissor.offset = {0, 0};
     scissor.extent = swapChainExtent;
 
-    VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {};
-    viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+    VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO};
     viewportStateCreateInfo.viewportCount = 1;
     viewportStateCreateInfo.pViewports = &viewport;
     viewportStateCreateInfo.scissorCount = 1;
@@ -1349,10 +1319,9 @@ dynamicStateCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStateEna
 dynamicStateCreateInfo.pDynamicStates = dynamicStateEnables.data();*/
 #pragma endregion
 
-#pragma region Rasterizer
-    //	-- Rasterizer --
-    VkPipelineRasterizationStateCreateInfo rasterizerCreateInfo = {};
-    rasterizerCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+#pragma region // Rasterizer
+    VkPipelineRasterizationStateCreateInfo rasterizerCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO};
     rasterizerCreateInfo.depthClampEnable =
         VK_FALSE; // Everything beyond the far plane can be rendered as a flat image onto the far plane
     rasterizerCreateInfo.rasterizerDiscardEnable = VK_FALSE;
@@ -1365,15 +1334,15 @@ dynamicStateCreateInfo.pDynamicStates = dynamicStateEnables.data();*/
 
 #pragma region Multisampling
     //	-- Multisampling --
-    VkPipelineMultisampleStateCreateInfo multisamplingCreateInfo = {};
-    multisamplingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+    VkPipelineMultisampleStateCreateInfo multisamplingCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO};
     multisamplingCreateInfo.sampleShadingEnable = VK_FALSE;
     // if (msaaSamples != VK_SAMPLE_COUNT_1_BIT) {
     multisamplingCreateInfo.rasterizationSamples = msaaSamples;
 //}
 #pragma endregion
 
-#pragma region Blending
+#pragma region // Blending
     //	-- Blending --
     // Blending decides how to blend a new colour being written to a fragment, with the old value
     // Blend Attatchment State (how blending is handled)
@@ -1392,8 +1361,9 @@ dynamicStateCreateInfo.pDynamicStates = dynamicStateEnables.data();*/
     colorState.alphaBlendOp = VK_BLEND_OP_ADD;
     // Summarised :	(1 * new alpha) + (0 * old alpha) = new alpha
 
-    VkPipelineColorBlendStateCreateInfo colorBlendingCreateInfo = {};
-    colorBlendingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+    VkPipelineColorBlendStateCreateInfo colorBlendingCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
+    // colorBlendingCreateInfo.sType = ;
     colorBlendingCreateInfo.logicOpEnable = VK_FALSE;
     colorBlendingCreateInfo.attachmentCount = 1;
     colorBlendingCreateInfo.pAttachments = &colorState;
@@ -1420,8 +1390,8 @@ dynamicStateCreateInfo.pDynamicStates = dynamicStateEnables.data();*/
 
 #pragma region Depth Stencil
     // DEPTH STENCIL TESTING
-    VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {};
-    depthStencilCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+    VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO};
     depthStencilCreateInfo.depthTestEnable = VK_TRUE;
     depthStencilCreateInfo.depthWriteEnable = VK_TRUE;
     depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
@@ -1431,8 +1401,7 @@ dynamicStateCreateInfo.pDynamicStates = dynamicStateEnables.data();*/
 
 #pragma region Create Graphics Pipeline
     // Graphics PipelineCreation
-    VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
-    pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+    VkGraphicsPipelineCreateInfo pipelineCreateInfo = {VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
     pipelineCreateInfo.stageCount = 2;
     pipelineCreateInfo.pStages = shaderStages;
     pipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
@@ -1619,19 +1588,18 @@ void VulkanRenderer::createCommandBuffers() {
 void VulkanRenderer::recordCommands(uint32_t imageIndex) {
     VkCommandBuffer cmdBuffer = commandBuffers[imageIndex];
 
-    // printf("req");
-    VkCommandBufferBeginInfo bufferBeginInfo = {};
-    bufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    VkCommandBufferBeginInfo bufferBeginInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
     bufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
-    VkRenderPassBeginInfo renderPassBeginInfo = {};
-    renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    VkRenderPassBeginInfo renderPassBeginInfo = {VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
     renderPassBeginInfo.renderPass = renderPass;
     renderPassBeginInfo.renderArea.offset = {0, 0};
     renderPassBeginInfo.renderArea.extent = swapChainExtent;
 
     std::array<VkClearValue, 2> clearValues = {};
-    clearValues[0].color = {clearColor.x, clearColor.y, clearColor.z, clearColor.w};
+    clearValues[0].color = {
+        {clearColor.x, clearColor.y, clearColor.z, clearColor.w}
+    };
     clearValues[1].depthStencil.depth = 1.0f;
 
     renderPassBeginInfo.pClearValues = clearValues.data();
@@ -1649,9 +1617,9 @@ void VulkanRenderer::recordCommands(uint32_t imageIndex) {
 
         vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
-        // For every Vulkan_MeshModel
+        // For every VulkanMeshModel
         for (size_t i = 0; i < AssetManager.MeshModelList.size(); i++) {
-            Vulkan_MeshModel *currentVulkan_MeshModel = &AssetManager.MeshModelList[i];
+            VulkanMeshModel *currentVulkan_MeshModel = &AssetManager.MeshModelList[i];
             if (AssetManager.MeshModelList[i].getState()) {
                 continue;
             }
@@ -1659,9 +1627,9 @@ void VulkanRenderer::recordCommands(uint32_t imageIndex) {
 
             vkCmdPushConstants(cmdBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Matrix), &temp);
 
-            // For every mesh inside the Vulkan_MeshModel
+            // For every mesh inside the VulkanMeshModel
             for (size_t j = 0; j < currentVulkan_MeshModel->getMeshCount(); j++) {
-                Vulkan_Mesh *currentMesh = currentVulkan_MeshModel->getMesh(j);
+                VulkanMesh *currentMesh = currentVulkan_MeshModel->getMesh(j);
                 VkBuffer vertexBuffers[1] = {currentMesh->getVertexBuffer()};
                 VkDeviceSize offsets[1] = {0};
 
@@ -1725,33 +1693,23 @@ void VulkanRenderer::createSynchronisation() {
     // renderFinished.resize(MAX_FRAME_DRAWS);
     renderFinished.resize(swapChainImages.size()); // <-- per-image
 
-    // // Semaphore Creation information
-    // VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-    // semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    // Semaphore Creation information
+    VkSemaphoreCreateInfo semaphoreCreateInfo = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
 
-    // // Fences creation info
-    // VkFenceCreateInfo fenceCreateInfo = {};
-    // fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    // fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+    // Fences creation info
+    VkFenceCreateInfo fenceCreateInfo = {VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+    fenceCreateInfo.pNext = nullptr;
+    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    // for (size_t i = 0; i < MAX_FRAME_DRAWS; i++) {
+    // for (size_t i = 0; i < MAX_FRAME_DRAWS; ++i) {
     //     if (vkCreateSemaphore(mainDevice.logicalDevice, &semaphoreCreateInfo, nullptr, &imageAvailable[i]) !=
     //             VK_SUCCESS ||
     //         vkCreateSemaphore(mainDevice.logicalDevice, &semaphoreCreateInfo, nullptr, &renderFinished[i]) !=
     //             VK_SUCCESS ||
     //         vkCreateFence(mainDevice.logicalDevice, &fenceCreateInfo, nullptr, &drawFences[i]) != VK_SUCCESS) {
-    //         throw std::runtime_error("Semaphore Creation Failed and/or fence!");
+    //         throw std::runtime_error("Failed to create sync objects");
     //     }
     // }
-
-    // Semaphore Creation information
-    VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-    semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    // Fences creation info
-    VkFenceCreateInfo fenceCreateInfo = {};
-    fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     // per-frame objects
     for (size_t i = 0; i < MAX_FRAME_DRAWS; i++) {
@@ -1860,12 +1818,16 @@ void VulkanRenderer::cleanUpSwapChain() {
 
     // Make sure nothing is using the old swapchain anymore
     vkDeviceWaitIdle(mainDevice.logicalDevice);
-    // Destroy per-image semaphores created in createSwapChain()
-    for (VkSemaphore s : renderFinished) {
-        if (s)
-            vkDestroySemaphore(mainDevice.logicalDevice, s, nullptr);
-    }
-    renderFinished.clear();
+
+    // // Destroy per-image semaphores created in createSwapChain()
+    // for (VkSemaphore &sem : renderFinished) {
+    //     if (sem) {
+    //         vkDestroySemaphore(mainDevice.logicalDevice, sem, nullptr);
+    //         sem = VK_NULL_HANDLE;
+    //     }
+    // }
+    // renderFinished.clear();
+
     // These are just handles into your per-frame fences; not owning resources.
     imagesInFlight.clear();
 

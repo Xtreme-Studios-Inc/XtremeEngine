@@ -1,8 +1,8 @@
-#include "OpenGL_Assets.h"
+#include "opengl-assets.h"
 #include <sstream>
 #include <vector>
 
-OpenGL_Assets::AllAssets *OpenGL_Assets::getAssetInfo() {
+OpenglAssets::AllAssets *OpenglAssets::getAssetInfo() {
     allAssets.ModelNames = &MeshModelNames;
     allAssets.modelPointers = &MeshModelList;
     // allAssets.lightPointers = &allLights;
@@ -10,8 +10,8 @@ OpenGL_Assets::AllAssets *OpenGL_Assets::getAssetInfo() {
     return &allAssets;
 }
 
-#pragma region Create Asset
-void OpenGL_Assets::asyncAssets(fs::path ModelPath) {
+#pragma region // Create Asset
+void OpenglAssets::asyncAssets(fs::path ModelPath) {
     // addTexture(TexturePath);
     // createOpenGL_MeshModel(ModelPath.c_str());
     static std::mutex lockFuncM;
@@ -27,7 +27,7 @@ void OpenGL_Assets::asyncAssets(fs::path ModelPath) {
     }
 
     if (!Load_Model_Files) {
-        // Read Vulkan_MeshModel from file to ADD model
+        // Read VulkanMeshModel from file to ADD model
         addedModelPaths.push_back(ModelPath);
         bool ShouldRead = true;
         for (size_t i = 0; i < MeshModelNames.size(); i++) {
@@ -59,25 +59,24 @@ void OpenGL_Assets::asyncAssets(fs::path ModelPath) {
     lockFuncM.unlock();
 }
 
-void OpenGL_Assets::createAsset(fs::path ModelPath) {
+void OpenglAssets::createAsset(fs::path ModelPath) {
 
     try {
         /*if (AssetLoadThread != nullptr)
         {
                 AssetLoadThread->detach();
-
                 delete(AssetLoadThread);
         }*/
-        AssetLoadThread.push_back(new std::thread(&OpenGL_Assets::asyncAssets, this, ModelPath));
+        AssetLoadThread.push_back(new std::thread(&OpenglAssets::asyncAssets, this, ModelPath));
     } catch (const std::exception &e) {
         printf("ERROR: %s\n", e.what());
     }
 }
 #pragma endregion
 
-#pragma region Model // Loading
+#pragma region // Model Loading
 
-int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
+int OpenglAssets::createOpenGLMeshModel(/*const std::string modelFile*/) {
     static std::mutex lockFuncM;
 
     if (!lockFuncM.try_lock()) {
@@ -86,9 +85,8 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
 
     size_t modelIndex = 0;
 
-    for (const fs::path modelPath : addedModelPaths) {
+    for (const fs::path &modelPath : addedModelPaths) {
 
-        // printf("creating: %s\n", modelPath.c_str());
         console.logLn("Creating: %s\n" + modelPath.generic_string());
         OpenGL_MeshModel model = OpenGL_MeshModel();
         string modelName = modelPath.filename().generic_string();
@@ -114,7 +112,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
         }
         //---
         /*
-        #pragma region Read Vulkan_MeshModel from file
+        #pragma region Read VulkanMeshModel from file
 
         // Import "scene" with multiple meshes
         Assimp::Importer importer;
@@ -127,7 +125,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
         #pragma endregion
         */
 
-        std::vector<std::string> TempTextureNames = model.LoadMaterials(addedModels.at(modelIndex));
+        std::vector<std::string> TempTextureNames = model.loadMaterials(addedModels.at(modelIndex));
 
         // std::vector<uint16_t> matToTex;
         if (textureNames.size() > 0) {
@@ -150,7 +148,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
             }
         }
 
-        // model.LoadNode(scene->mRootNode, scene);
+        // model.loadNode(scene->mRootNode, scene);
         // OpenGL_MeshModel myModel = OpenGL_MeshModel();
         model.LoadModel(addedModels.at(modelIndex));
         // modelList.push_back(myModel);
@@ -186,7 +184,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
     //     }
     //     //---
     //     /*
-    //     #pragma region Read Vulkan_MeshModel from file
+    //     #pragma region Read VulkanMeshModel from file
     //     // Import "scene" with multiple meshes
     //     Assimp::Importer importer;
     //     const aiScene* scene = importer.ReadFile(modelFile, aiProcess_Triangulate | aiProcess_FlipUVs |
@@ -196,7 +194,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
     //     }
     //     #pragma endregion
     //     */
-    //     std::vector<std::string> TempTextureNames = model.LoadMaterials(addedModels.at(i));
+    //     std::vector<std::string> TempTextureNames = model.loadMaterials(addedModels.at(i));
     //     // std::vector<uint16_t> matToTex;
     //     if (textureNames.size() > 0) {
     //         model.resizeMeshToTex(textureNames.size());
@@ -216,7 +214,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
     //             model.setMeshToTex(0, addTexture(textureNames[i]));
     //         }
     //     }
-    //     // model.LoadNode(scene->mRootNode, scene);
+    //     // model.loadNode(scene->mRootNode, scene);
     //     // OpenGL_MeshModel myModel = OpenGL_MeshModel();
     //     model.LoadModel(addedModels.at(i));
     //     // modelList.push_back(myModel);
@@ -240,7 +238,7 @@ int OpenGL_Assets::createOpenGL_MeshModel(/*const std::string modelFile*/) {
     return 0;
 }
 
-void OpenGL_Assets::destroyOpenGL_MeshModel(int ModelID) {
+void OpenglAssets::destroyOpenGLMeshModel(int ModelID) {
     // vkDeviceWaitIdle(*Device);
     MeshModelList.at(ModelID).destroyModel();
     MeshModelNames.at(ModelID) = "";
@@ -248,7 +246,7 @@ void OpenGL_Assets::destroyOpenGL_MeshModel(int ModelID) {
 
 #pragma endregion
 
-uint16_t OpenGL_Assets::addTexture(string fileName) {
+uint16_t OpenglAssets::addTexture(string fileName) {
     static std::mutex lockFuncT;
 
     if (!lockFuncT.try_lock()) {
@@ -272,7 +270,8 @@ uint16_t OpenGL_Assets::addTexture(string fileName) {
     fs::path texturePath = ASSETS / "Textures" / fileName;
     // OpenGL_Texture *tex = new OpenGL_Texture(fileLoc.c_str());
     OpenGL_Texture *tex = new OpenGL_Texture(texturePath.generic_string().c_str());
-    bool result;
+
+    bool result = false;
     if (fileName.substr(fileName.length() - 3, 3) == "png") {
         result = tex->LoadTextureA();
     } else if (fileName.substr(fileName.length() - 3, 3) == "jpg") {
@@ -280,7 +279,6 @@ uint16_t OpenGL_Assets::addTexture(string fileName) {
     }
 
     if (!result) {
-
         lockFuncT.unlock();
         printf("Failed To Load Texture");
         return 0;
@@ -303,7 +301,7 @@ uint16_t OpenGL_Assets::addTexture(string fileName) {
 }
 
 #pragma region Lights
-void OpenGL_Assets::addLight() {
+void OpenglAssets::addLight() {
     // newLight = DirectionalLight();
     // LightList.push_back(DirectionalLight());
 
@@ -316,7 +314,7 @@ void OpenGL_Assets::addLight() {
 #pragma endregion
 
 #pragma region CleanUp
-void OpenGL_Assets::cleanUpAssets() {
+void OpenglAssets::cleanUpAssets() {
     /*if (AssetLoadThread != nullptr) {
 
             AssetLoadThread->detach();

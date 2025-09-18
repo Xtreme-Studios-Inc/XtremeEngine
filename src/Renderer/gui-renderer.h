@@ -5,14 +5,14 @@
 #include <backends/imgui_impl_glfw.h>
 #include <imgui.h>
 
-#include "../common.h"
+#include "../core/common.h"
 
 #ifdef VULKAN
 #include <backends/imgui_impl_vulkan.h>
 #include "../asset-loading/vulkan-assets/vulkan-assets.h"
 #elif OPENGL
 #include <backends/imgui_impl_opengl3.h>
-#include "../asset-loading/OpenGL_Assets/OpenGL_Assets.h"
+#include "../asset-loading/opengl-assets/opengl-assets.h"
 #endif
 
 class GUI_Renderer {
@@ -21,23 +21,23 @@ class GUI_Renderer {
 #ifdef VULKAN
     GUI_Renderer(GLFWwindow &window,
                  VkInstance &instance,
-                 VkDevice &Device,
-                 VkPhysicalDevice &PhysicalDevice,
-                 VkQueue &Queue,
-                 uint32_t GraphicsFamily,
-                 VkRenderPass &RenderPass,
-                 VkCommandPool &GraphicsCommandPool,
+                 VkDevice &device,
+                 VkPhysicalDevice &physicalDevice,
+                 VkQueue &queue,
+                 uint32_t graphicsFamily,
+                 VkRenderPass &renderPass,
+                 VkCommandPool &graphicsCommandPool,
                  VkSampleCountFlagBits &msaaSampleCount,
-                 bool &ApplyGraphics,
-                 GraphicSettings &CurrentGraphicSettings,
+                 bool &applyGraphics,
+                 GraphicSettings &currentGraphicSettings,
+                 Vulkan_Assets &assetManager);
 
-                 Vulkan_Assets &AssetManager);
 #elif OPENGL
     GUI_Renderer(GLFWwindow &window,
-                 bool &ApplyGraphics,
+                 bool &applyGraphics,
                  /*GraphicSettings& CurrentGraphicSettings,*/
 
-                 OpenGL_Assets &AssetManager);
+                 OpenglAssets &assetManager);
 #endif
     ~GUI_Renderer() = default;
 
@@ -50,8 +50,7 @@ class GUI_Renderer {
     void CleanUpGuiComponents();
 
   private:
-    // --- Initialization Info ---
-#pragma region Initialization Info Structs
+#pragma region // Initialization Info
 
 #ifdef VULKAN
     // Initialization Info
@@ -87,22 +86,21 @@ class GUI_Renderer {
         // GraphicSettings* CurrentGraphicSettings{};
 
         ////OBJECTS
-        OpenGL_Assets *AssetManager{};
+        OpenglAssets *AssetManager{};
     } IgInitInfo;
 #endif
 
 #pragma endregion
 
-    // --- Menu Info Structs ---
-#pragma region Menu Info Structs
+#pragma region // Menu Info Structs
 
     struct SharedInfo {
 
-        int *selectedObject{};
+        int *selectedObject = nullptr;
 #ifdef VULKAN
-        const Vulkan_Assets::AllAssets *allAssets{};
+        const Vulkan_Assets::AllAssets *allAssets = nullptr;
 #elif OPENGL
-        const OpenGL_Assets::AllAssets *allAssets{};
+        const OpenglAssets::AllAssets *allAssets = nullptr;
 #endif
 
     } sharedInfo; // Shared by more than one menu
@@ -116,9 +114,9 @@ class GUI_Renderer {
         bool ShowMenu = true;
 
         bool *LocalTransform;
-        glm::vec3 *position{};
-        glm::vec3 *rotation{};
-        glm::vec3 *scale{};
+        glm::vec3 *position;
+        glm::vec3 *rotation;
+        glm::vec3 *scale;
 
     } detailsInfo; // Details Menu
 
@@ -136,33 +134,32 @@ class GUI_Renderer {
 
 #pragma endregion
 
-    // --- Render Menu Functions ---
-#pragma region Menu Functions
+#pragma region // Render Menu Functions
 
     void ShowFileMenu();
     void MainMenuBar();
 
-    void RenderOutlinerMenu();
-    void ShowOutlinerTree(const char *prefix, int uid);
+    void renderOutlinerMenu();
+    void showOutlinerTree(const char *prefix, int uid);
 
-    void RenderDetailsMenu();
+    void renderDetailsMenu();
 
-    void RenderContentMenu();
+    void renderContentMenu();
 
-    void RenderStatsOverlay();
+    void renderStatsOverlay();
 
 #pragma endregion
 
   public:
     template <class T>
-    void RenderMenus(bool *LocalTransform,
-                     glm::vec3 *translation,
-                     glm::vec3 *rotation,
-                     glm::vec3 *scale,
+    void RenderMenus(bool &LocalTransform,
+                     glm::vec3 &translation,
+                     glm::vec3 &rotation,
+                     glm::vec3 &scale,
                      int *selectedObject,
                      const T assetList) {
 
-#pragma region Hotkeys
+#pragma region // Hotkeys
 
         // Hide and unhide Content Browser
         // [ Left_Ctrl + Space ]
@@ -179,10 +176,10 @@ class GUI_Renderer {
         sharedInfo.allAssets = assetList;
 
         // menu 'OBJECT DETAILS'
-        detailsInfo.LocalTransform = LocalTransform;
-        detailsInfo.position = translation;
-        detailsInfo.rotation = rotation;
-        detailsInfo.scale = scale;
+        detailsInfo.LocalTransform = &LocalTransform;
+        detailsInfo.position = &translation;
+        detailsInfo.rotation = &rotation;
+        detailsInfo.scale = &scale;
 
         // menu 'WORLD OUTLINER'
         // NON
@@ -206,16 +203,16 @@ class GUI_Renderer {
         MainMenuBar();
 
         if (outlinerInfo.ShowMenu)
-            RenderOutlinerMenu();
+            renderOutlinerMenu();
 
         if (detailsInfo.ShowMenu)
-            RenderDetailsMenu();
+            renderDetailsMenu();
 
         if (browserInfo.ShowMenu)
-            RenderContentMenu();
+            renderContentMenu();
 
         if (statsInfo.ShowMenu)
-            RenderStatsOverlay();
+            renderStatsOverlay();
 
         // Rendering
         ImGui::Render();

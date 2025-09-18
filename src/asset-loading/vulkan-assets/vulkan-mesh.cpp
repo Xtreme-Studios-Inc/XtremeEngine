@@ -2,13 +2,13 @@
 
 #pragma region Public Functions & Construction and Deconstruction
 
-Vulkan_Mesh::Vulkan_Mesh(VkPhysicalDevice newPhysicalDevice,
-                         VkDevice newDevice,
-                         VkQueue transferQueue,
-                         VkCommandPool transferCommandPool,
-                         std::vector<Vertex> *vertices,
-                         std::vector<uint32_t> *indices,
-                         int newTexId) {
+VulkanMesh::VulkanMesh(VkPhysicalDevice newPhysicalDevice,
+                       VkDevice newDevice,
+                       VkQueue transferQueue,
+                       VkCommandPool transferCommandPool,
+                       std::vector<Vertex> *vertices,
+                       std::vector<uint32_t> *indices,
+                       int newTexId) {
 
     vertexCount = static_cast<uint32_t>(vertices->size());
     indexCount = static_cast<uint32_t>(indices->size());
@@ -22,7 +22,7 @@ Vulkan_Mesh::Vulkan_Mesh(VkPhysicalDevice newPhysicalDevice,
     // modelMatrix.model = glm::mat4(1.0f);
 }
 
-void Vulkan_Mesh::destroyBuffers() {
+void VulkanMesh::destroyBuffers() {
     if (vertexBufferMemory != nullptr) {
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vkFreeMemory(device, vertexBufferMemory, nullptr);
@@ -35,9 +35,9 @@ void Vulkan_Mesh::destroyBuffers() {
 
 #pragma region Create Buffer Functions
 // Buffer To store all vertices in memory
-void Vulkan_Mesh::createVertexBuffer(VkQueue transferQueue,
-                                     VkCommandPool transferCommandPool,
-                                     std::vector<Vertex> *vertices) {
+void VulkanMesh::createVertexBuffer(VkQueue transferQueue,
+                                    VkCommandPool transferCommandPool,
+                                    std::vector<Vertex> *vertices) {
     // Get size of buffer needed for vertices
     VkDeviceSize bufferSize = sizeof(Vertex) * vertices->size();
 
@@ -87,9 +87,9 @@ void Vulkan_Mesh::createVertexBuffer(VkQueue transferQueue,
 #pragma endregion
 }
 // Buffer To store all indices in memory
-void Vulkan_Mesh::createIndexBuffer(VkQueue transferQueue,
-                                    VkCommandPool transferCommandPool,
-                                    std::vector<uint32_t> *indices) {
+void VulkanMesh::createIndexBuffer(VkQueue transferQueue,
+                                   VkCommandPool transferCommandPool,
+                                   std::vector<uint32_t> *indices) {
     // Get size of buffer needed for indices
     VkDeviceSize bufferSize = sizeof(uint32_t) * indices->size();
 

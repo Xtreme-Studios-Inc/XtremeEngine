@@ -3,23 +3,23 @@
 #include "../../renderer/vulkan-renderer/vulkan-util.h"
 #include "../asset-constants.h"
 
-class Vulkan_Mesh {
+class VulkanMesh {
   public:
-    Vulkan_Mesh() = default;
-    Vulkan_Mesh(VkPhysicalDevice newPhysicalDevice,
-                VkDevice newDevice,
-                VkQueue transferQueue,
-                VkCommandPool transferCommandPool,
-                std::vector<Vertex> *vertices,
-                std::vector<uint32_t> *indices,
-                int newTexId);
+    VulkanMesh() = default;
+    VulkanMesh(VkPhysicalDevice newPhysicalDevice,
+               VkDevice newDevice,
+               VkQueue transferQueue,
+               VkCommandPool transferCommandPool,
+               std::vector<Vertex> *vertices,
+               std::vector<uint32_t> *indices,
+               int newTexId);
 
-    ~Vulkan_Mesh() = default;
+    ~VulkanMesh() = default;
 
     size_t getTexId() { return texId; };
     void setTexId(size_t ID) { texId = ID; }
 
-    // virtual Vulkan_Mesh getOBJ() override { return *this; }
+    // virtual VulkanMesh getOBJ() override { return *this; }
     uint32_t getVertexCount() { return vertexCount; };
     uint32_t getIndexCount() { return indexCount; };
     VkBuffer getVertexBuffer() { return vertexBuffer; };

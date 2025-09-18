@@ -1,5 +1,7 @@
 #pragma once
-// #include"../renderer/vulkan-renderer/VulkanUtillities.h"
+
+#include <codeframe>
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -27,16 +29,16 @@ class Entity {
     void transformRotation(GLfloat x, GLfloat y, GLfloat z);
     void transformScale(GLfloat x, GLfloat y, GLfloat z);
 
-    bool *getTransformType() { return &LocalTransform; };
-    glm::vec3 *getPosition() { return &Position; };
-    glm::vec3 *getRotation() { return &Rotation; };
-    glm::vec3 *getScale() { return &Scale; };
+    bool &getTransformType() { return localTransform; };
+    glm::vec3 &getPosition() { return position; };
+    glm::vec3 &getRotation() { return rotation; };
+    glm::vec3 &getScale() { return scale; };
 
   private:
-    bool LocalTransform = false;
-    glm::vec3 Position = {0.0f, 0.0f, 0.0f};
-    glm::vec3 Rotation = {0.0f, 0.0f, 0.0f};
-    glm::vec3 Scale = {1.0f, 1.0f, 1.0f};
+    bool localTransform = false;
+    glm::vec3 position = {0.0f, 0.0f, 0.0f};
+    glm::vec3 rotation = {0.0f, 0.0f, 0.0f};
+    glm::vec3 scale = {1.0f, 1.0f, 1.0f};
 
-    Matrix Matrix;
+    Matrix matrix;
 };

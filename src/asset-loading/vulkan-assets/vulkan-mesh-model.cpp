@@ -1,10 +1,10 @@
 #include "vulkan-mesh-model.h"
 
-Vulkan_MeshModel::Vulkan_MeshModel(/*std::vector<Vulkan_Mesh> newMeshList*/) { MeshList.clear(); }
+VulkanMeshModel::VulkanMeshModel(/*vector<VulkanMesh> newMeshList*/) { MeshList.clear(); }
 
-size_t Vulkan_MeshModel::getMeshCount() { return MeshList.size(); }
+size_t VulkanMeshModel::getMeshCount() { return MeshList.size(); }
 
-Vulkan_Mesh *Vulkan_MeshModel::getMesh(size_t index) {
+VulkanMesh *VulkanMeshModel::getMesh(size_t index) {
     if (index >= MeshList.size()) {
         throw std::runtime_error("Attrmpted to access invalid Mesh index!");
     }
@@ -12,27 +12,26 @@ Vulkan_Mesh *Vulkan_MeshModel::getMesh(size_t index) {
     return &MeshList[index];
 }
 
-void Vulkan_MeshModel::destroyModel() {
-    if (getState()) {
+void VulkanMeshModel::destroyModel() {
+    if (getState())
         return;
-    }
+
     if (MODEL_INSTANCE) {
-        this->~Vulkan_MeshModel();
+        this->~VulkanMeshModel();
         return;
     }
 
-    // printf("Mesh Count In Model : %d\n", getMeshCount());
-    for (auto &mesh : MeshList) {
+    for (auto &mesh : MeshList)
         mesh.destroyBuffers();
-    }
+
     DESTROYED = true;
 }
 
-std::vector<std::string> Vulkan_MeshModel::LoadMaterials(const aiScene *scene) {
+vector<string> VulkanMeshModel::loadMaterials(const aiScene *scene) {
     // Create 1:1 sized list of textures
-    std::vector<std::string> textures;
+    vector<string> textures;
     textures.resize(scene->mNumMaterials);
-    // std::vector<std::string> textureList(0);
+    // vector<string> textureList(0);
 
     for (size_t i = 0; i < textures.size(); i++) {
         aiMaterial *material = scene->mMaterials[i];
@@ -41,10 +40,10 @@ std::vector<std::string> Vulkan_MeshModel::LoadMaterials(const aiScene *scene) {
         if (material->GetTextureCount(aiTextureType_DIFFUSE)) {
             aiString path;
             if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) {
-                size_t idx = std::string(path.data).rfind("\\");
+                size_t idx = string(path.data).rfind("\\");
 
-                std::string fileName = std::string(path.data).substr(idx + 1);
-                printf(fileName.c_str());
+                string fileName = string(path.data).substr(idx + 1);
+                console.logLn(fileName);
 
                 textures[i] = fileName;
             }
@@ -54,14 +53,14 @@ std::vector<std::string> Vulkan_MeshModel::LoadMaterials(const aiScene *scene) {
 }
 
 // Loads a tree of meshes (mesh parent with child meshes)
-std::vector<Vulkan_Mesh> Vulkan_MeshModel::LoadNode(VkPhysicalDevice *newPhysicalDevice,
-                                                    VkDevice *newDevice,
-                                                    VkQueue *transferQueue,
-                                                    VkCommandPool *transferCommandPool,
-                                                    aiNode *node,
-                                                    const aiScene *scene,
-                                                    std::vector<uint16_t> matToTex) {
-    // std::vector<Vulkan_Mesh> meshList;
+vector<VulkanMesh> VulkanMeshModel::loadNode(VkPhysicalDevice *newPhysicalDevice,
+                                             VkDevice *newDevice,
+                                             VkQueue *transferQueue,
+                                             VkCommandPool *transferCommandPool,
+                                             aiNode *node,
+                                             const aiScene *scene,
+                                             vector<uint16_t> matToTex) {
+    // vector<VulkanMesh> meshList;
     //  Go through each mesh at this node and create it, then add it to our meshList
     for (size_t i = 0; i < node->mNumMeshes; i++) {
         // vkWaitSemaphores(*newDevice, renderFinished->at(*currentFrame), )
@@ -76,7 +75,7 @@ std::vector<Vulkan_Mesh> Vulkan_MeshModel::LoadNode(VkPhysicalDevice *newPhysica
     }
 
     for (size_t i = 0; i < node->mNumChildren; i++) {
-        std::vector<Vulkan_Mesh> newList = LoadNode(
+        vector<VulkanMesh> newList = loadNode(
             newPhysicalDevice, newDevice, transferQueue, transferCommandPool, node->mChildren[i], scene, matToTex);
         // meshList.insert(meshList.end(), newList.begin(), newList.end());
     }
@@ -84,15 +83,15 @@ std::vector<Vulkan_Mesh> Vulkan_MeshModel::LoadNode(VkPhysicalDevice *newPhysica
     return MeshList;
 }
 
-Vulkan_Mesh *Vulkan_MeshModel::LoadMesh(VkPhysicalDevice newPhysicalDevice,
-                                        VkDevice newDevice,
-                                        VkQueue transferQueue,
-                                        VkCommandPool transferCommandPool,
-                                        aiMesh *mesh,
-                                        const aiScene *scene,
-                                        std::vector<uint16_t> matToTex) {
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
+VulkanMesh *VulkanMeshModel::LoadMesh(VkPhysicalDevice newPhysicalDevice,
+                                      VkDevice newDevice,
+                                      VkQueue transferQueue,
+                                      VkCommandPool transferCommandPool,
+                                      aiMesh *mesh,
+                                      const aiScene *scene,
+                                      vector<uint16_t> matToTex) {
+    vector<Vertex> vertices;
+    vector<uint32_t> indices;
 
     // Resize vertex list to hold all vertices for mesh
     vertices.resize(mesh->mNumVertices);
@@ -126,13 +125,13 @@ Vulkan_Mesh *Vulkan_MeshModel::LoadMesh(VkPhysicalDevice newPhysicalDevice,
 
     // Create new mesh with details
 
-    Vulkan_Mesh *newMesh = new Vulkan_Mesh(newPhysicalDevice,
-                                           newDevice,
-                                           transferQueue,
-                                           transferCommandPool,
-                                           &vertices,
-                                           &indices,
-                                           matToTex[mesh->mMaterialIndex]); //
+    VulkanMesh *newMesh = new VulkanMesh(newPhysicalDevice,
+                                         newDevice,
+                                         transferQueue,
+                                         transferCommandPool,
+                                         &vertices,
+                                         &indices,
+                                         matToTex[mesh->mMaterialIndex]); //
 
     return newMesh;
 }

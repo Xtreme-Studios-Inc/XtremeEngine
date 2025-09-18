@@ -1,11 +1,11 @@
-#include "definitions.h"
-#include "renderer/GUI_Renderer.h"
+#include "core/definitions.h"
+#include "renderer/gui-renderer.h"
 
 #ifdef VULKAN
 #include "renderer/vulkan-renderer/vulkan-renderer.h"
 VulkanRenderer Renderer;
 #elif OPENGL
-#include "renderer/OpenGL_Renderer/OpenGL_Renderer.h"
+#include "renderer/OpenGL_Renderer/opengl-renderer.h"
 OpenGL_Renderer Renderer;
 #else
 #endif
@@ -41,8 +41,6 @@ int main() {
 
     // camera needs to be set as active to change the vulkan view matrix
     camera.setAsActive(Renderer.getViewMatrix());
-
-    int counter = 0;
 
     // PROGRAM LOOP
     while (!window.shouldClose()) {
