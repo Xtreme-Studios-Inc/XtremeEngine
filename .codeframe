@@ -16,39 +16,23 @@
             "libPath": "codeframe",
             "type": "library",
             "linkType": "source",
-            "outputType": "static",
-            "options": {},
-            "custom": true
+            "custom": true,
+            "outputType": "static"
         },
         {
             "name": "vulkan",
             "libPath": "external/vulkan",
             "type": "library",
             "linkType": "static",
-            "outputType": "static",
-            "options": {},
             "libs": [
                 "vulkan-1"
             ]
-        },
-        {
-            "name": "assimp",
-            "libPath": "external/assimp",
-            "type": "library",
-            "linkType": "static",
-            "outputType": "static",
-            "options": {},
-            "libs": [
-                "assimp"
-            ],
-            "version": "6.0.2"
         },
         {
             "name": "imgui",
             "libPath": "external/imgui",
             "type": "library",
             "linkType": "source",
-            "outputType": "static",
             "options": {
                 "backends": [
                     "glfw",
@@ -62,25 +46,19 @@
             "name": "glad",
             "libPath": "external/glad",
             "type": "library",
-            "linkType": "source",
-            "outputType": "static",
-            "options": {}
+            "linkType": "source"
         },
         {
             "name": "stb-img",
             "libPath": "external/stb-img",
             "type": "library",
-            "linkType": "header_only",
-            "outputType": "static",
-            "options": {}
+            "linkType": "header_only"
         },
         {
             "name": "glfw",
             "libPath": "external/glfw",
             "type": "library",
             "linkType": "static",
-            "outputType": "static",
-            "options": {},
             "libs": [
                 "glfw3"
             ]
@@ -90,8 +68,6 @@
             "libPath": "external/glm",
             "type": "library",
             "linkType": "source",
-            "outputType": "static",
-            "options": {},
             "libs": [
                 "glm"
             ],
@@ -102,11 +78,18 @@
             "libPath": "external/zlib",
             "type": "library",
             "linkType": "static",
-            "outputType": "static",
-            "options": {},
             "libs": [
                 "zlib"
             ]
+        },
+        {
+            "name": "assimp",
+            "libPath": "external/assimp",
+            "linkType": "static",
+            "libs": [
+                "assimp"
+            ],
+            "version": "6.0.2"
         }
     ],
     "bundle": {
