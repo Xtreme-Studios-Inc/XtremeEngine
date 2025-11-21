@@ -49,8 +49,8 @@
             "linkType": "source"
         },
         {
-            "name": "stb-img",
-            "libPath": "external/stb-img",
+            "name": "stb-image",
+            "libPath": "external/stb-image",
             "type": "library",
             "linkType": "header_only"
         },
@@ -105,18 +105,18 @@
         "docsPath": "docs"
     },
     "projectPreset": {
-        "type": "cpp",
+        "lang": "cpp",
         "details": {
             "cppVersion": "c++23",
-            "cVersion": "c23"
+            "cVersion": "c23",
+            "custom": {
+                "compileFlags": [
+                    "-DVULKAN",
+                    "-DGLFW_INCLUDE_NONE",
+                    "-DASSIMP_BUILD_ZLIB=OFF"
+                ],
+                "systemLibs": []
+            }
         }
-    },
-    "systemLibs": [],
-    "custom": {
-        "compileFlags": [
-            "-DVULKAN",
-            "-DGLFW_INCLUDE_NONE",
-            "-DASSIMP_BUILD_ZLIB=OFF"
-        ]
     }
 }

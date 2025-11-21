@@ -1,6 +1,6 @@
 #include "opengl-renderer.h"
 
-#pragma region Public Functions
+#pragma region // Public Functions
 
 int OpenGL_Renderer::init_OpenGL_Renderer(GLFWwindow *newWindow) {
     window = newWindow;

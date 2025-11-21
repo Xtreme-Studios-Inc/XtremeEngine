@@ -11,7 +11,7 @@
 #include "../../core/window.h"
 
 #include "../../asset-loading/opengl-assets/opengl-assets.h"
-#include "../../time.h"
+#include "../../core/time.h"
 #include "../gui-renderer.h"
 #include "shaders.h"
 

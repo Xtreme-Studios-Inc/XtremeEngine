@@ -99,24 +99,28 @@ void GUI_Renderer::init_imGUI_Vulkan() {
         throw std::runtime_error("could not create descriptor pool for in init_imGUI()!");
     }
 
-    ImGui_ImplVulkan_InitInfo init_info = {};
-    init_info.Instance = *IgInitInfo.instance;
-    init_info.PhysicalDevice = *IgInitInfo.PhysicalDevice;
-    init_info.Device = *IgInitInfo.Device;
-    init_info.Queue = *IgInitInfo.Queue;
-    init_info.QueueFamily = IgInitInfo.GraphicsFamily;
-    // init_info.PipelineCache = pipelineCache;
-    init_info.DescriptorPool = imguiPool;
-    init_info.Allocator = nullptr;
-    init_info.MinImageCount = 3;
-    init_info.ImageCount = 3;
-    // init_info.CheckVkResultFn = 0;
-    init_info.MSAASamples = *IgInitInfo.MsaaSampleCount;
+    ImGui_ImplVulkan_PipelineInfo   pipelineInfo {
+        .RenderPass = *IgInitInfo.RenderPass,
+        .Subpass = 0,
+        .MSAASamples = *IgInitInfo.MsaaSampleCount,
+    }; 
 
-    init_info.RenderPass = *IgInitInfo.RenderPass;
+    ImGui_ImplVulkan_InitInfo imguiInitInfo = {};
+    imguiInitInfo.Instance = *IgInitInfo.instance;
+    imguiInitInfo.PhysicalDevice = *IgInitInfo.PhysicalDevice;
+    imguiInitInfo.Device = *IgInitInfo.Device;
+    imguiInitInfo.Queue = *IgInitInfo.Queue;
+    imguiInitInfo.QueueFamily = IgInitInfo.GraphicsFamily;
+    // imguiInitInfo.PipelineCache = pipelineCache;
+    imguiInitInfo.DescriptorPool = imguiPool;
+    imguiInitInfo.Allocator = nullptr;
+    imguiInitInfo.MinImageCount = 3;
+    imguiInitInfo.ImageCount = 3;
+    // imguiInitInfo.CheckVkResultFn = 0;
+    imguiInitInfo.PipelineInfoMain = pipelineInfo;
 
-    // ImGui_ImplVulkan_Init(&init_info, *IgInitInfo.RenderPass);
-    ImGui_ImplVulkan_Init(&init_info);
+    // ImGui_ImplVulkan_Init(&imguiInitInfo, *IgInitInfo.RenderPass);
+    ImGui_ImplVulkan_Init(&imguiInitInfo);
 
     // execute a gpu command to upload imgui font textures
 
