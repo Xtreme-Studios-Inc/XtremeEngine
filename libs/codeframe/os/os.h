@@ -1,5 +1,7 @@
 #pragma once
 
+#include "os/os-info.h"
+
 // Platform abstraction layer for CodeFrame.
 // Handles all OS-specific functionality in one place.
 
@@ -14,9 +16,9 @@
 #define PLATFORM "linux"
 
 #elif defined(__APPLE__)
-#include "apple/cf-apple.h"
+#include "macos/cf-macos.h"
 
-#define PLATFORM "apple"
+#define PLATFORM "macos"
 
 #else
 #error "OS not supported!"

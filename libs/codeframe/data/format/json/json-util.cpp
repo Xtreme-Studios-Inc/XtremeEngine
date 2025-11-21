@@ -1,16 +1,14 @@
 #include "json-util.h"
 
 // CREATE
-void createJsonFile(const string& path,
-    const cf::json& defaultContent = {})
-{
+void createJsonFile(const string &path, const cf::json &defaultContent = {}) {
     if (fs::exists(path)) {
         console.warn("File already exists: " + path);
         return;
     }
 
-    fs::create_directories(
-        fs::path(path).parent_path());
+    dirEnsureExists(fs::path(path).parent_path());
+    // fs::create_directories(fs::path(path).parent_path());
     std::ofstream file(path);
 
     if (!file) {
@@ -22,10 +20,10 @@ void createJsonFile(const string& path,
 }
 
 // UPDATE
-void updateJsonFile(const fs::path& filePath, const cf::ordered_json& jsonData)
-{
+void updateJsonFile(const fs::path &filePath, const cf::ordered_json &jsonData) {
     // Create parent directories if they do not exist
-    fs::create_directories(filePath.parent_path());
+    // fs::create_directories(filePath.parent_path());
+    dirEnsureExists(filePath.parent_path());
 
     // Write to a temporary file first
     fs::path tempFilePath = filePath;
@@ -55,34 +53,28 @@ void updateJsonFile(const fs::path& filePath, const cf::ordered_json& jsonData)
     }
 }
 
-// GET DATA
-cf::json getJsonValue(cf::json jsonData, string key)
-{
-    if (jsonData.find(key) == jsonData.end()) {
-        // console.logLn("Failed to find key: " + key);
+cf::json getJsonValue(cf::json jsonData, string key) {
+    if (jsonData.find(key) == jsonData.end())
         return "";
-    }
 
     return jsonData[key];
 }
 
-cf::ordered_json getJsonValues(cf::ordered_json& jsonData, vector<string>& keys)
-{
+cf::ordered_json getJsonValues(cf::ordered_json &jsonData, vector<string> &keys) {
     cf::ordered_json fetchedValues = cf::ordered_json::object();
 
-    for (const auto& key : keys) {
-        try {
+    for (const auto &key : keys) {
+        if (jsonData.contains(key)) {
             fetchedValues[key] = jsonData[key];
-        } catch (const std::exception& e) {
-            console.error("Failed to find config value for key: " + key);
+        } else {
+            console.error("Missing config key: " + key);
         }
     }
 
     return fetchedValues;
 }
 
-cf::json loadJsonFile(fs::path path)
-{
+cf::json loadJsonFile(fs::path path) {
     std::ifstream file(path);
 
     string filename = fileName(path);
@@ -97,31 +89,31 @@ cf::json loadJsonFile(fs::path path)
         cf::json data;
         file >> data;
         return data;
-    } catch (const cf::json::parse_error& e) {
+    } catch (const cf::json::parse_error &e) {
         console.error("JSON parse error in '" + filename + "': " + string(e.what()));
         return cf::json::object(); // Safe fallback
     }
 }
 
-std::optional<cf::json> readJsonFile(fs::path path)
-{
+std::optional<cf::ordered_json> readJsonFile(fs::path path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         return std::nullopt;
     }
 
-    string jsonString((std::istreambuf_iterator<char>(file)),
-        std::istreambuf_iterator<char>());
-
+    string jsonString((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     try {
-        return cf::json::parse(jsonString);
-    } catch (const cf::json::exception&) {
+        return cf::ordered_json::parse(
+            jsonString,
+            /*call-back*/ nullptr,
+            /*allow_exceptions*/ true,
+            /*ignore_comments*/ true);
+    } catch (const cf::ordered_json::exception &) {
         return std::nullopt;
     }
 }
 
-vector<string> getJsonKeys(cf::json& jsonData)
-{
+vector<string> getJsonKeys(cf::ordered_json &jsonData) {
     vector<string> keys;
     for (auto it = jsonData.begin(); it != jsonData.end(); ++it) {
         keys.push_back(it.key());

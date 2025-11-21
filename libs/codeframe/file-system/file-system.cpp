@@ -2,11 +2,19 @@
 
 #pragma region // FILE OPERATIONS
 
-unsigned int countFiles(const fs::path& directoryPath)
-{
+bool containsFile(const fs::path &folder, const string &targetFile) {
+    for (auto const &entry : fs::recursive_directory_iterator(folder)) {
+        if (entry.is_regular_file() && entry.path().filename() == targetFile) {
+            return true;
+        }
+    }
+    return false;
+}
+
+unsigned int countFiles(const fs::path &directoryPath) {
     unsigned int countFiles = 0;
 
-    for (const auto& entry : fs::recursive_directory_iterator(directoryPath)) {
+    for (const auto &entry : fs::recursive_directory_iterator(directoryPath)) {
         if (fs::is_regular_file(entry)) {
             ++countFiles;
         }
@@ -15,9 +23,7 @@ unsigned int countFiles(const fs::path& directoryPath)
     return countFiles;
 }
 
-std::optional<fs::path> fileSearchUpwards(const fs::path& startDir,
-    const string& filename)
-{
+std::optional<fs::path> fileSearchUpwards(const fs::path &startDir, const string &filename) {
     fs::path currentDir = startDir;
 
     while (true) {
@@ -28,26 +34,21 @@ std::optional<fs::path> fileSearchUpwards(const fs::path& startDir,
         }
 
         if (!currentDir.has_parent_path() || currentDir == currentDir.parent_path()) {
-            console.error("Could not find file: " + filename + " in current or parent directory.");
             break;
-        } else if (currentDir.has_parent_path()) {
-            // console.logLn(currentDir.string());
+        } else if (currentDir.has_parent_path())
             currentDir = currentDir.parent_path();
-        }
     }
 
     return {};
 }
 
-std::optional<fs::path> fileSearchDownwards(const fs::path& startDir,
-    const string& filename)
-{
+std::optional<fs::path> fileSearchDownwards(const fs::path &startDir, const string &filename) {
     if (!fs::exists(startDir) || !fs::is_directory(startDir)) {
         console.error("Invalid start directory: " + startDir.string());
         return {};
     }
 
-    for (const auto& entry : fs::recursive_directory_iterator(startDir)) {
+    for (const auto &entry : fs::recursive_directory_iterator(startDir)) {
         if (fs::is_regular_file(entry) && entry.path().filename() == filename) {
             return entry.path(); // Found the file, return the full path
         }
@@ -58,30 +59,26 @@ std::optional<fs::path> fileSearchDownwards(const fs::path& startDir,
 }
 
 void forEachFileRecursive(
-    const fs::path& root,
-    std::function<void(const fs::directory_entry&)> callback,
-    bool skipOnPermissionDenied = true)
-{
-    auto options = skipOnPermissionDenied
-        ? fs::directory_options::skip_permission_denied
-        : fs::directory_options::none;
-    for (const auto& entry : fs::recursive_directory_iterator(root, options)) {
+    const fs::path &root,
+    std::function<void(const fs::directory_entry &)> callback,
+    bool skipOnPermissionDenied = true) {
+    auto options = skipOnPermissionDenied ? fs::directory_options::skip_permission_denied : fs::directory_options::none;
+    for (const auto &entry : fs::recursive_directory_iterator(root, options)) {
         if (fs::is_regular_file(entry.path())) {
             callback(entry);
         }
     }
 }
 
-void filesRenameRecursive(const fs::path& root, const StringReplaceMap& replaceMap)
-{
-    forEachFileRecursive(root, [&](const fs::directory_entry& entry) {
+void filesRenameRecursive(const fs::path &root, const StringReplaceMap &replaceMap) {
+    forEachFileRecursive(root, [&](const fs::directory_entry &entry) {
         fs::path oldPath = entry.path();
         fs::path parent = oldPath.parent_path();
         std::string fileName = oldPath.filename().string();
         std::string newFileName = fileName;
 
         // Replace in file name
-        for (const auto& [from, to] : replaceMap) {
+        for (const auto &[from, to] : replaceMap) {
             size_t pos = 0;
             while ((pos = newFileName.find(from, pos)) != std::string::npos) {
                 newFileName.replace(pos, from.length(), to);
@@ -99,8 +96,7 @@ void filesRenameRecursive(const fs::path& root, const StringReplaceMap& replaceM
 // --- JSON ---
 #pragma region
 
-cf::json processFile(const fs::path& path)
-{
+cf::json processFile(const fs::path &path) {
     const string extension = path.extension().string();
     cf::json fileJson;
     fileJson["fileName"] = path.filename().string();
@@ -116,8 +112,7 @@ cf::json processFile(const fs::path& path)
     return fileJson;
 }
 
-cf::ordered_json fileToJson(const fs::path& path)
-{
+cf::ordered_json fileToJson(const fs::path &path) {
 
     cf::ordered_json fileJson;
     fileJson["fileName"] = path.filename().string();
@@ -136,7 +131,7 @@ cf::ordered_json fileToJson(const fs::path& path)
         }
 
         fileJson["content"] = fileContent;
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         console.log(path.string());
         std::cerr << e.what() << '\n';
     }
@@ -144,8 +139,7 @@ cf::ordered_json fileToJson(const fs::path& path)
     return fileJson;
 }
 
-cf::ordered_json directoryToJson(const fs::path& path, bool verbose)
-{
+cf::ordered_json directoryToJson(const fs::path &path, bool verbose) {
     cf::ordered_json dirJson;
     dirJson["dirName"] = path.filename().string();
 
@@ -154,8 +148,8 @@ cf::ordered_json directoryToJson(const fs::path& path, bool verbose)
     dirChildren["donwloads"] = cf::json::array();
     dirChildren["directories"] = cf::json::array();
 
-    for (const auto& dirEntry : fs::directory_iterator(path)) {
-        const auto& entryPath = dirEntry.path();
+    for (const auto &dirEntry : fs::directory_iterator(path)) {
+        const auto &entryPath = dirEntry.path();
 
         if (fs::is_directory(entryPath)) {
             dirChildren["directories"].push_back(directoryToJson(entryPath, verbose));
@@ -173,8 +167,7 @@ cf::ordered_json directoryToJson(const fs::path& path, bool verbose)
     return dirJson;
 }
 
-cf::ordered_json fileSystemToJson(const fs::path& path, bool verbose)
-{
+cf::ordered_json fileSystemToJson(const fs::path &path, bool verbose) {
     try {
         if (!fs::exists(path)) {
             console.error("File or directory does not exist: " + path.string());
@@ -190,11 +183,12 @@ cf::ordered_json fileSystemToJson(const fs::path& path, bool verbose)
         }
 
         console.error("Unsupported file type: " + path.string());
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         std::cerr << e.what() << '\n';
     } catch (...) {
-        console.error("JSON conversion failed — likely due to invalid UTF-8 "
-                      "content in one or more files.");
+        console.error(
+            "JSON conversion failed — likely due to invalid UTF-8 "
+            "content in one or more files.");
     }
 
     return cf::ordered_json();

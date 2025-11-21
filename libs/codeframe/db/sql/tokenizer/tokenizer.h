@@ -1,31 +1,32 @@
 #pragma once
 
 #include <core/base.h>
-#include <string/string.h>
+#include <string-util/string.h>
 #include <unordered_map>
 
 #include "tokens.h"
 
-// The Tokenizer breaks a raw SQL string into atomic chunks — called tokens — that the parser can understand.
+// The Tokenizer breaks a raw SQL string into atomic chunks — called tokens —
+// that the parser can understand.
 
 class Tokenizer {
-public:
-    Tokenizer(const string& input)
-        : input(input)
-        , pos(0)
-    {
-    }
+  public:
+    Tokenizer(const string &input) : input(input), pos(0) {}
 
     vector<Token> tokenize();
 
-private:
+  private:
     string input;
     size_t pos;
     std::unordered_map<string, TokenType> keywords = {
-        { "SELECT", TokenType::DATA_KEYWORD }, { "FROM", TokenType::DATA_KEYWORD },
-        { "WHERE", TokenType::DATA_KEYWORD }, { "INSERT", TokenType::DATA_KEYWORD },
-        { "INTO", TokenType::DATA_KEYWORD }, { "VALUES", TokenType::DATA_KEYWORD },
-        { "UPDATE", TokenType::DATA_KEYWORD }, { "DELETE", TokenType::DATA_KEYWORD }
+        {"SELECT", TokenType::DATA_KEYWORD},
+        {"FROM",   TokenType::DATA_KEYWORD},
+        {"WHERE",  TokenType::DATA_KEYWORD},
+        {"INSERT", TokenType::DATA_KEYWORD},
+        {"INTO",   TokenType::DATA_KEYWORD},
+        {"VALUES", TokenType::DATA_KEYWORD},
+        {"UPDATE", TokenType::DATA_KEYWORD},
+        {"DELETE", TokenType::DATA_KEYWORD}
     };
 
     char peek() const { return input[pos]; }
@@ -42,10 +43,9 @@ private:
     bool isOperator(char c) const { return c == '=' || c == '<' || c == '>' || c == '!'; }
     bool isSymbol(char c) const { return c == ',' || c == ';' || c == '(' || c == ')' || c == '*'; }
 
-    string toUpper(const string& str)
-    {
+    string toUpper(const string &str) {
         string result = str;
-        for (char& c : result)
+        for (char &c : result)
             c = std::toupper(c);
         return result;
     }

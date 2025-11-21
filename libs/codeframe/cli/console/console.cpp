@@ -2,19 +2,20 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <conio.h> // For _getch() on Windows
+
 struct _Utf8Out {
     _Utf8Out() { SetConsoleOutputCP(CP_UTF8); }
 } _utf8_out;
 #endif
 
 // constexpr char FILL[] = "\xE2\x96\x93"; // ▓ (U+2593)
-constexpr char LEFT[] = "\xE2\x96\x90"; // ▐
+constexpr char LEFT[] = "\xE2\x96\x90";  // ▐
 constexpr char RIGHT[] = "\xE2\x96\x8C"; // ▌
-constexpr char FILL[] = "\xE2\x96\x88"; // █ (U+2588)
+constexpr char FILL[] = "\xE2\x96\x88";  // █ (U+2588)
 constexpr char EMPTY[] = "\xE2\x96\x91"; // ░ (U+2591)
 
-void append_repeat(std::string& out, const char* bytes, std::size_t count)
-{
+void append_repeat(string &out, const char *bytes, std::size_t count) {
     out.reserve(out.size() + count * 3); // each glyph = 3 UTF-8 bytes
     for (std::size_t i = 0; i < count; ++i)
         out.append(bytes, 3);
@@ -30,7 +31,7 @@ Console console;
 // Relationships:  Core implementation shared with verbose and header outputs.
 // ─────────────────────────────────────────────────────────────
 
-#pragma region // Console Utilities
+#pragma region             // Console Utilities
 void Console::hideCursor() // Hide cursor
 {
     std::cout << "\x1b[?25l";
@@ -40,18 +41,18 @@ void Console::showCursor() // Show cursor again
     std::cout << "\x1b[?25h";
 }
 
-void Console::moveCursorUp(const size_t& lines) // Move cursor up N lines to redraw over old menu
+void Console::moveCursorUp(const size_t &lines) // Move cursor up N lines to redraw over old menu
 {
     std::cout << "\x1b[" << lines << "A";
 }
 
-void Console::clearCursor() // Clear the line before rewriting (optional but nice)
+void Console::clearCursor() // Clear the line before rewriting (optional but
+                            // nice)
 {
     std::cout << "\r\033[2K";
 }
 
-void Console::clear()
-{
+void Console::clear() {
 #ifdef _WIN32
     // Try VT (ANSI escape) mode first
     HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -67,7 +68,7 @@ void Console::clear()
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     if (GetConsoleScreenBufferInfo(h, &csbi)) {
         DWORD count;
-        COORD home = { 0, 0 };
+        COORD home = {0, 0};
         DWORD cells = csbi.dwSize.X * csbi.dwSize.Y;
         FillConsoleOutputCharacter(h, ' ', cells, home, &count);
         FillConsoleOutputAttribute(h, csbi.wAttributes, cells, home, &count);
@@ -79,8 +80,7 @@ void Console::clear()
 #endif
 }
 
-void Console::startLoadBar(std::size_t total, const string& label, const string& log)
-{
+void Console::startLoadBar(std::size_t total, const string &label, const string &log) {
     // const int innerWidth = 40;
     loadBar.label = label;
     loadBar.total = total;
@@ -91,8 +91,7 @@ void Console::startLoadBar(std::size_t total, const string& label, const string&
     updateLoadBar(0, log);
 }
 
-void Console::updateLoadBar(std::size_t delta, const string& log)
-{
+void Console::updateLoadBar(std::size_t delta, const string &log) {
     // <█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░>
     // (█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░)
     // [█░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░]
@@ -125,9 +124,9 @@ void Console::updateLoadBar(std::size_t delta, const string& log)
         logLn(log);
 
         // print a single separator exactly as wide as the bar body
-        std::string sep;
+        string sep;
         append_repeat(sep, "—", innerWidth + 2); // '▐' + innerWidth + '▌'
-        logLn(sep, { GREEN });
+        logLn(sep, {GREEN});
 
         loadBar.hasSeperator = true;
     }
@@ -137,15 +136,12 @@ void Console::updateLoadBar(std::size_t delta, const string& log)
         std::cout << loadBar.label << ' ';
 
     // ▐ (ORCHID_DARK)  █ (ORCHID)  ░ (ORCHID_DARK)  ▌ (ORCHID_DARK)
-    std::cout << tColor(ORCHID_DARK) << LEFT << END_OUT
-              << tColor(ORCHID) << filledBar << END_OUT
-              << tColor(ORCHID_DARK) << emptyBar << END_OUT
-              << tColor(ORCHID_DARK) << RIGHT << END_OUT
-              << " " << int(ratio * 100) << "% (" << loadBar.done << "/" << loadBar.total << ")" << std::flush;
+    std::cout << tColor(ORCHID_DARK) << LEFT << END_OUT << tColor(ORCHID) << filledBar << END_OUT << tColor(ORCHID_DARK)
+              << emptyBar << END_OUT << tColor(ORCHID_DARK) << RIGHT << END_OUT << " " << int(ratio * 100) << "% ("
+              << loadBar.done << "/" << loadBar.total << ")" << std::flush;
 }
 
-void Console::endLoadBar()
-{
+void Console::endLoadBar() {
     // std::cout << "\r\033[2K" << std::flush;
     clearCursor();
     // logLn();
@@ -158,11 +154,10 @@ void Console::endLoadBar()
 #pragma region Console Output
 
 // Outputs to console without newline
-void Console::log(const string& str, const LogOptions options)
-{
+void Console::log(const string &str, const LogOptions options) {
     // Only apply color if at least one value is present
     if (options.fg || options.bg) {
-        string colorPrefix = getLogPrefix({ options.fg, options.bg });
+        string colorPrefix = getLogPrefix({options.fg, options.bg});
         std::cout << colorPrefix << str << END_OUT;
     } else {
         std::cout << str; // No color applied
@@ -170,10 +165,9 @@ void Console::log(const string& str, const LogOptions options)
 }
 
 // Outputs to the console and adds newline
-void Console::logLn(const string& str, LogOptions options)
-{
+void Console::logLn(const string &str, LogOptions options) {
     if (options.fg || options.bg) {
-        string colorPrefix = getLogPrefix({ options.fg, options.bg });
+        string colorPrefix = getLogPrefix({options.fg, options.bg});
         std::cout << colorPrefix << str << END_OUT << "\n";
     } else {
         std::cout << str << "\n"; // No color applied
@@ -181,8 +175,7 @@ void Console::logLn(const string& str, LogOptions options)
 }
 
 // Outputs an error to the console, defaults to RED if no color is passed
-void Console::warn(const string& str, LogOptions options)
-{
+void Console::warn(const string &str, LogOptions options) {
     if (options.fg || options.bg) {
         string colorPrefix = getLogPrefix(options);
         std::cerr << colorPrefix << str << END_OUT << "\n";
@@ -193,8 +186,7 @@ void Console::warn(const string& str, LogOptions options)
 }
 
 // Outputs an error to the console, defaults to RED if no color is passed
-void Console::error(const string& str, LogOptions options)
-{
+void Console::error(const string &str, LogOptions options) {
     if (options.fg || options.bg) {
         string colorPrefix = getLogPrefix(options);
         std::cerr << colorPrefix << str << END_OUT << "\n";
@@ -212,8 +204,7 @@ void Console::error(const string& str, LogOptions options)
 // ─────────────────────────────────────────────────────────────
 
 // Logs a string vector in array-like format
-void Console::logVector(const std::vector<string>& vec)
-{
+void Console::logVector(const std::vector<string> &vec) {
     std::cout << "[\n";
     for (size_t i = 0; i < vec.size(); ++i) {
         std::cout << " " << vec[i];
@@ -226,38 +217,38 @@ void Console::logVector(const std::vector<string>& vec)
 }
 
 // Logs a formatted section header
-void Console::logHeader(const string& label, LogOptions options)
-{
+void Console::logHeader(const string &label, LogOptions options) {
     // Only apply color if at least one value is present
     if (options.fg || options.bg) {
-        string colorPrefix = getLogPrefix({ options.fg, options.bg });
-        std::cout << colorPrefix << genString("-", 27) << label
-                  << genString("-", 27) << END_OUT << "\n";
+        string colorPrefix = getLogPrefix({options.fg, options.bg});
+        std::cout << colorPrefix << genString("-", 27) << label << genString("-", 27) << END_OUT << "\n";
     } else {
-        LogOptions options = { .fg = MAGENTA, .bold = true };
+        LogOptions options = {.fg = MAGENTA, .bold = true};
         string colorPrefix = getLogPrefix(options);
-        std::cout << colorPrefix << genString("-", 27) << label
-                  << genString("-", 27) << END_OUT << "\n"; // No color applied
+        std::cout << colorPrefix << genString("-", 27) << label << genString("-", 27) << END_OUT
+                  << "\n"; // No color applied
     }
 }
 
 // Logs a "page" style block with title and main content
-void Console::logPage(const string& title, const string& str, const rgb& fg,
-    const rgb& bg)
-{
-    console.log(title + ":\n" + str, { fg, bg });
+void Console::logPage(const string &title, const string &str, const rgb &fg, const rgb &bg) {
+    console.log(title + ":\n" + str, {fg, bg});
 }
 
 #pragma endregion
 
-#pragma region Console Input
-string Console::selectOption(const vector<string>& options)
-{
+#pragma region // Console Input
+string Console::selectOption(const vector<string> &options) {
     CursorHideGuard hideCursor;
 
     int selected = 0;
     bool running = true;
     bool drawnOnce = false;
+
+    // NEW: compute a fixed width so we can overwrite lines without clearing
+    size_t maxLineLength = 0;
+    for (const string &opt : options)
+        maxLineLength = std::max(maxLineLength, opt.size() + 2); // account for "> " / "  "
 
     auto showMenu = [&](int selected) {
         if (drawnOnce) {
@@ -267,39 +258,49 @@ string Console::selectOption(const vector<string>& options)
         }
 
         for (int i = 0; i < options.size(); ++i) {
-            clearCursor();
+            // Build the line and pad it so we fully overwrite previous content
+            string line = (i == selected ? "> " : "  ") + options[i];
+            if (line.size() < maxLineLength)
+                line.append(maxLineLength - line.size(), ' ');
+
             if (i == selected) {
-                std::cout << "> " << options[i] << "\n";
+                console.logLn(line, {.fg = MAGENTA_MUTED});
             } else {
-                std::cout << "  " << options[i] << "\n";
+                console.logLn(line, {.fg = GRAY_DARK});
             }
         }
     };
 
+#ifdef _WIN32
     while (running) {
         showMenu(selected);
 
-        int key = _getch();
+        if (_kbhit()) { // Added arrow key logic inside here to be able to handle ctrl + c exit input
+            int key = _getch();
 
-        if (key == 224) { // Arrow key prefix
-            key = _getch();
-            if (key == 72) { // Up arrow
-                selected = (selected - 1 + options.size()) % options.size();
-            } else if (key == 80) { // Down arrow
-                selected = (selected + 1) % options.size();
+            if (key == 224) { // Arrow key prefix
+                key = _getch();
+                if (key == 72) { // Up arrow
+                    selected = (selected - 1 + options.size()) % options.size();
+                } else if (key == 80) { // Down arrow
+                    selected = (selected + 1) % options.size();
+                }
+            } else if (key == 13) { // Enter key
+                running = false;
             }
-        } else if (key == 13) { // Enter key
-            running = false;
+        } else {
+            // small sleep to avoid 100% CPU
+            Sleep(70);
         }
     }
+#endif
 
     clear();
     return toLowerCase(options[selected]);
 }
 
 // Prompt the user for input with an optional styled message
-string Console::prompt(const string& message, LogOptions options)
-{
+string Console::prompt(const string &message, LogOptions options) {
     if (!message.empty())
         log(message + " ", options); // No newline, prompt on same line
 
@@ -310,14 +311,13 @@ string Console::prompt(const string& message, LogOptions options)
 }
 
 // Prompt for Yes/No confirmation with optional default value
-bool Console::confirm(const string& question, bool defaultYes)
-{
+bool Console::confirm(const string &question, bool defaultYes) {
     // Example: "Proceed with overwrite? [Y/n]: "
     string suffix = defaultYes ? " [Y/n]: " : " [y/N]: ";
     string fullPrompt = question + suffix;
 
     while (true) {
-        log(fullPrompt, { .fg = CYAN, .bold = true });
+        log(fullPrompt, {.fg = CYAN, .bold = true});
         string response;
         std::getline(std::cin, response);
         response = toLowerCase(trim(response));
@@ -344,29 +344,21 @@ bool Console::confirm(const string& question, bool defaultYes)
 // ─────────────────────────────────────────────────────────────
 
 // Logs a message in gray (verbose tone)
-void Console::logVerbose(const string& message)
-{
-    console.logLn(message, { .fg = GRAY_DARK });
-}
+void Console::logVerbose(const string &message) { console.logLn(message, {.fg = GRAY_DARK}); }
 
 // Logs a message in green (success tone)
-void Console::logLnS(const string& message)
-{
-    console.logLn(message, { .fg = GREEN_DARK });
-}
+void Console::logLnS(const string &message) { console.logLn(message, {.fg = GREEN_DARK}); }
 
 // Logs a message in magenta with preceding line break
-void Console::logLnM(const string& message)
-{
+void Console::logLnM(const string &message) {
     console.logLn();
-    console.logLn(message, { .fg = MAGENTA });
+    console.logLn(message, {.fg = MAGENTA});
 }
 
 // ---- Utility ----
 
 // TODO: Test to see if background and forground gets added
-string Console::getLogPrefix(LogOptions options)
-{
+string Console::getLogPrefix(LogOptions options) {
     string front;
     string back;
 

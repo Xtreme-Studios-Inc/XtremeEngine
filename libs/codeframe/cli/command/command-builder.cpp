@@ -3,63 +3,47 @@
 #include <filesystem>
 #include <sstream>
 
-const string& CommandBuilder::getCmd()
-{
+const string &CommandBuilder::getCmd() {
     if (dirty) {
         cmd = build();
         dirty = false;
     }
     return cmd;
 };
-void CommandBuilder::setCmd(string& cmd)
-{
-    this->cmd = cmd;
-};
+void CommandBuilder::setCmd(string &cmd) { this->cmd = cmd; };
 
-const string& CommandBuilder::getCwd()
-{
-    return cwd;
-};
-void CommandBuilder::setCwd(string& cwd)
-{
-    this->cwd = cwd;
-};
+const string &CommandBuilder::getCwd() { return cwd; };
+void CommandBuilder::setCwd(string &cwd) { this->cwd = cwd; };
 
-void CommandBuilder::addSegment(const string& segment)
-{
-    tokens.push_back({ CommandTokenType::Segment, "", segment });
+void CommandBuilder::addSegment(const string &segment) {
+    tokens.push_back({CommandTokenType::Segment, "", segment});
     dirty = true;
 };
-void CommandBuilder::addPath(const fs::path& path)
-{
-    tokens.push_back({ CommandTokenType::Path, "", path.generic_string() });
+void CommandBuilder::addPath(const fs::path &path) {
+    tokens.push_back({CommandTokenType::Path, "", path.generic_string()});
     dirty = true;
 };
-void CommandBuilder::addFlag(const string& flag)
-{
-    tokens.push_back({ CommandTokenType::Flag, "", flag });
+void CommandBuilder::addFlag(const string &flag) {
+    tokens.push_back({CommandTokenType::Flag, "", flag});
     dirty = true;
 };
-void CommandBuilder::addKeyValue(const string& key, const string& value)
-{
-    tokens.push_back({ CommandTokenType::KeyValue, key, value });
+void CommandBuilder::addKeyValue(const string &key, const string &value) {
+    tokens.push_back({CommandTokenType::KeyValue, key, value});
     dirty = true;
 };
 
-void CommandBuilder::addRelativeResource(const string& value)
-{
-    tokens.push_back({ CommandTokenType::RelativeResource, "", value });
+void CommandBuilder::addRelativeResource(const string &value) {
+    tokens.push_back({CommandTokenType::RelativeResource, "", value});
     dirty = true;
 };
 
-string CommandBuilder::build() const
-{
+string CommandBuilder::build() const {
     std::ostringstream oss;
     oss << cmd;
-    for (const auto& token : tokens) {
+    for (const auto &token : tokens) {
         switch (token.type) {
         case CommandTokenType::Flag:
-            oss << " -" << token.value;
+            oss << " " << flagChar << token.value;
             break;
         case CommandTokenType::Path:
             oss << " \"" << token.value << "\"";
@@ -73,7 +57,7 @@ string CommandBuilder::build() const
             break;
         }
         case CommandTokenType::KeyValue:
-            oss << " -" << token.key << "=" << token.value;
+            oss << " " << flagChar << token.key << "=" << token.value;
             break;
         }
     }

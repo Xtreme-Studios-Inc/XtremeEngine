@@ -7,7 +7,7 @@
 #ifdef NDEBUG
 const bool enableValidationLayers = true;
 #else
-const bool enableValidationLayers = true;
+const bool enableValidationLayers = false;
 #endif
 
 #ifdef IM_GUI_LAYER

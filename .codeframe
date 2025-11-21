@@ -23,9 +23,9 @@
             "name": "vulkan",
             "libPath": "external/vulkan",
             "type": "library",
-            "linkType": "static",
+            "linkType": "dynamic",
             "libs": [
-                "vulkan-1"
+                "vulkan"
             ]
         },
         {
@@ -85,11 +85,21 @@
         {
             "name": "assimp",
             "libPath": "external/assimp",
+            "type": "library",
             "linkType": "static",
             "libs": [
                 "assimp"
             ],
             "version": "6.0.2"
+        },
+        {
+            "name": "openssl",
+            "libPath": "external/openssl",
+            "linkType": "static",
+            "libs": [
+                "ssl",
+                "crypto"
+            ]
         }
     ],
     "bundle": {
@@ -109,13 +119,20 @@
         "details": {
             "cppVersion": "c++23",
             "cVersion": "c23",
+            "type": "",
+            "assets": [
+                {
+                    "from": "assets",
+                    "to": "assets"
+                }
+            ],
+            "systemLibs": [],
             "custom": {
                 "compileFlags": [
                     "-DVULKAN",
                     "-DGLFW_INCLUDE_NONE",
                     "-DASSIMP_BUILD_ZLIB=OFF"
-                ],
-                "systemLibs": []
+                ]
             }
         }
     }

@@ -19,8 +19,8 @@
 // public:
 //     explicit Connection(const string& path);
 
-//     ConnectionResult connect(const std::string& dbType, const std::string& host, int port);
-//     ConnectionResult getConnectionResult();
+//     ConnectionResult connect(const std::string& dbType, const std::string&
+//     host, int port); ConnectionResult getConnectionResult();
 
 //     bool open();
 //     void close();
@@ -64,8 +64,10 @@
 // //     sqlite3 *db;                    /* Store allocated handle here */
 // //     int rc;                         /* Return code */
 // //     int isThreadsafe;               /* True for threadsafe connections */
-// //     char *zOpen = 0;                /* Filename argument to pass to BtreeOpen() */
-// //     char *zErrMsg = 0;              /* Error message from sqlite3ParseUri() */
+// //     char *zOpen = 0;                /* Filename argument to pass to
+// BtreeOpen() */
+// //     char *zErrMsg = 0;              /* Error message from
+// sqlite3ParseUri() */
 // //     int i;                          /* Loop counter */
 
 // //   #ifdef SQLITE_ENABLE_API_ARMOR
@@ -144,15 +146,19 @@
 
 // //     assert( sizeof(db->aLimit)==sizeof(aHardLimit) );
 // //     memcpy(db->aLimit, aHardLimit, sizeof(db->aLimit));
-// //     db->aLimit[SQLITE_LIMIT_WORKER_THREADS] = SQLITE_DEFAULT_WORKER_THREADS;
+// //     db->aLimit[SQLITE_LIMIT_WORKER_THREADS] =
+// SQLITE_DEFAULT_WORKER_THREADS;
 // //     db->autoCommit = 1;
 // //     db->nextAutovac = -1;
 // //     db->szMmap = sqlite3GlobalConfig.szMmap;
 // //     db->nextPagesize = 0;
-// //     db->init.azInit = sqlite3StdType; /* Any array of string ptrs will do */
+// //     db->init.azInit = sqlite3StdType; /* Any array of string ptrs will do
+// */
 // //   #ifdef SQLITE_ENABLE_SORTER_MMAP
-// //     /* Beginning with version 3.37.0, using the VFS xFetch() API to memory-map
-// //     ** the temporary files used to do external sorts (see code in vdbesort.c)
+// //     /* Beginning with version 3.37.0, using the VFS xFetch() API to
+// memory-map
+// //     ** the temporary files used to do external sorts (see code in
+// vdbesort.c)
 // //     ** is disabled. It can still be used either by defining
 // //     ** SQLITE_ENABLE_SORTER_MMAP at compile time or by using the
 // //     ** SQLITE_TESTCTRL_SORTER_MMAP test-control at runtime. */
@@ -179,7 +185,8 @@
 // //   **         1                  off                          on
 // //   **         0                  off                         off
 // //   **
-// //   ** Legacy behavior is 3 (double-quoted string literals are allowed anywhere)
+// //   ** Legacy behavior is 3 (double-quoted string literals are allowed
+// anywhere)
 // //   ** and so that is the default.  But developers are encouraged to use
 // //   ** -DSQLITE_DQS=0 (best) or -DSQLITE_DQS=1 (second choice) if possible.
 // //   */
@@ -193,7 +200,8 @@
 // //                    | SQLITE_DqsDDL
 // //   #endif
 
-// //   #if !defined(SQLITE_DEFAULT_AUTOMATIC_INDEX) || SQLITE_DEFAULT_AUTOMATIC_INDEX
+// //   #if !defined(SQLITE_DEFAULT_AUTOMATIC_INDEX) ||
+// SQLITE_DEFAULT_AUTOMATIC_INDEX
 // //                    | SQLITE_AutoIndex
 // //   #endif
 // //   #if SQLITE_DEFAULT_CKPTFULLFSYNC
@@ -238,16 +246,20 @@
 // //     sqlite3HashInit(&db->aModule);
 // //   #endif
 
-// //     /* Add the default collation sequence BINARY. BINARY works for both UTF-8
+// //     /* Add the default collation sequence BINARY. BINARY works for both
+// UTF-8
 // //     ** and UTF-16, so add a version for each to avoid any unnecessary
-// //     ** conversions. The only error that can occur here is a malloc() failure.
+// //     ** conversions. The only error that can occur here is a malloc()
+// failure.
 // //     **
 // //     ** EVIDENCE-OF: R-52786-44878 SQLite defines three built-in collating
 // //     ** functions:
 // //     */
 // //     createCollation(db, sqlite3StrBINARY, SQLITE_UTF8, 0, binCollFunc, 0);
-// //     createCollation(db, sqlite3StrBINARY, SQLITE_UTF16BE, 0, binCollFunc, 0);
-// //     createCollation(db, sqlite3StrBINARY, SQLITE_UTF16LE, 0, binCollFunc, 0);
+// //     createCollation(db, sqlite3StrBINARY, SQLITE_UTF16BE, 0, binCollFunc,
+// 0);
+// //     createCollation(db, sqlite3StrBINARY, SQLITE_UTF16LE, 0, binCollFunc,
+// 0);
 // //     createCollation(db, "NOCASE", SQLITE_UTF8, 0, nocaseCollatingFunc, 0);
 // //     createCollation(db, "RTRIM", SQLITE_UTF8, 0, rtrimCollFunc, 0);
 // //     if( db->mallocFailed ){
@@ -290,7 +302,8 @@
 // //       rc = SQLITE_MISUSE_BKPT;  /* IMP: R-18321-05872 */
 // //     }else{
 // //       if( zFilename==0 ) zFilename = ":memory:";
-// //       rc = sqlite3ParseUri(zVfs, zFilename, &flags, &db->pVfs, &zOpen, &zErrMsg);
+// //       rc = sqlite3ParseUri(zVfs, zFilename, &flags, &db->pVfs, &zOpen,
+// &zErrMsg);
 // //     }
 // //     if( rc!=SQLITE_OK ){
 // //       if( rc==SQLITE_NOMEM ) sqlite3OomFault(db);
@@ -323,7 +336,8 @@
 // //     sqlite3BtreeLeave(db->aDb[0].pBt);
 // //     db->aDb[1].pSchema = sqlite3SchemaGet(db, 0);
 
-// //     /* The default safety_level for the main database is FULL; for the temp
+// //     /* The default safety_level for the main database is FULL; for the
+// temp
 // //     ** database it is OFF. This matches the pager layer defaults.
 // //     */
 // //     db->aDb[0].zDbSName = "main";
@@ -337,7 +351,8 @@
 // //     }
 
 // //     /* Register all built-in functions, but do not attempt to read the
-// //     ** database schema yet. This is delayed until the first time the database
+// //     ** database schema yet. This is delayed until the first time the
+// database
 // //     ** is accessed.
 // //     */
 // //     sqlite3Error(db, SQLITE_OK);
@@ -361,14 +376,16 @@
 // //     }
 
 // //   #ifdef SQLITE_ENABLE_INTERNAL_FUNCTIONS
-// //     /* Testing use only!!! The -DSQLITE_ENABLE_INTERNAL_FUNCTIONS=1 compile-time
+// //     /* Testing use only!!! The -DSQLITE_ENABLE_INTERNAL_FUNCTIONS=1
+// compile-time
 // //     ** option gives access to internal functions by default.
 // //     ** Testing use only!!! */
 // //     db->mDbFlags |= DBFLAG_InternalFunc;
 // //   #endif
 
 // //     /* -DSQLITE_DEFAULT_LOCKING_MODE=1 makes EXCLUSIVE the default locking
-// //     ** mode.  -DSQLITE_DEFAULT_LOCKING_MODE=0 make NORMAL the default locking
+// //     ** mode.  -DSQLITE_DEFAULT_LOCKING_MODE=0 make NORMAL the default
+// locking
 // //     ** mode.  Doing nothing at all also makes NORMAL the default.
 // //     */
 // //   #ifdef SQLITE_DEFAULT_LOCKING_MODE

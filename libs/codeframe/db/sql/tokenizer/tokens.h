@@ -5,19 +5,10 @@
 #include "keywords.h"
 #include "operators.h"
 
-enum class TokenType {
-    DATA_KEYWORD,
-    DB_KEYWORD,
-    IDENTIFIER,
-    NUMBER,
-    STRING,
-    OPERATOR,
-    SYMBOL,
-    UNKNOWN
-};
+enum class TokenType { DATA_KEYWORD, DB_KEYWORD, IDENTIFIER, NUMBER, STRING, OPERATOR, SYMBOL, UNKNOWN };
 
 struct Token {
-    TokenType type;
-    string value;
-    size_t position;
+  TokenType type;
+  string value;
+  size_t position;
 };

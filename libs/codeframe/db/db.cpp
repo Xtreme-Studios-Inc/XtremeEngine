@@ -21,10 +21,12 @@
 //     }
 
 //     listen(server_fd, 1);
-//     std::cout << "Fake MySQL server listening on 127.0.0.1:3306..." << std::endl;
+//     std::cout << "Fake MySQL server listening on 127.0.0.1:3306..." <<
+//     std::endl;
 
 //     int addrlen = sizeof(address);
-//     int client_fd = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+//     int client_fd = accept(server_fd, (struct sockaddr*)&address,
+//     (socklen_t*)&addrlen);
 
 //     if (client_fd < 0) {
 //         perror("Accept failed");
@@ -34,17 +36,15 @@
 //     // --- Step 1: Send MySQL Handshake Packet ---
 //     unsigned char handshake[] = {
 //         0x0A, // Protocol version
-//         '5', '.', '7', '.', '0', '-', 'f', 'a', 'k', 'e', 0x00, // Server version + null
-//         0x01, 0x00, 0x00, 0x00, // Connection ID
-//         'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', // Auth plugin data part 1
-//         0x00, // Filler
-//         0xFF, 0xF7, // Capability flags (lower)
-//         0x21, // Character set (utf8_general_ci)
-//         0x00, 0x02, // Status flags
-//         0xFF, 0xFF, // Capability flags (upper)
-//         0x00, // Auth plugin length
-//         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Reserved
-//         'm', 'y', 's', 'q', 'l', '_', 'n', 'a', 't', 'i', 'v', 'e', '_', 'p', 'a', 's', 's', 'w', 'o', 'r', 'd', 0x00
+//         '5', '.', '7', '.', '0', '-', 'f', 'a', 'k', 'e', 0x00, // Server
+//         version + null 0x01, 0x00, 0x00, 0x00, // Connection ID 'a', 'b',
+//         'c', 'd', 'e', 'f', 'g', 'h', // Auth plugin data part 1 0x00, //
+//         Filler 0xFF, 0xF7, // Capability flags (lower) 0x21, // Character set
+//         (utf8_general_ci) 0x00, 0x02, // Status flags 0xFF, 0xFF, //
+//         Capability flags (upper) 0x00, // Auth plugin length 0x00, 0x00,
+//         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Reserved 'm', 'y', 's', 'q',
+//         'l', '_', 'n', 'a', 't', 'i', 'v', 'e', '_', 'p', 'a', 's', 's', 'w',
+//         'o', 'r', 'd', 0x00
 //     };
 
 //     // Prefix with 3-byte length + 1-byte packet number (0)
@@ -72,7 +72,8 @@
 //     };
 
 //     send(client_fd, ok, sizeof(ok), 0);
-//     std::cout << "Sent OK packet. Connection should appear successful." << std::endl;
+//     std::cout << "Sent OK packet. Connection should appear successful." <<
+//     std::endl;
 
 //     close(client_fd);
 //     close(server_fd);

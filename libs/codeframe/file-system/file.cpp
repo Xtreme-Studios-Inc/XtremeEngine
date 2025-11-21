@@ -30,8 +30,7 @@
 //     return data;
 // }
 
-string readFile(const string& filePath)
-{
+string readFile(const string &filePath) {
     std::ifstream fileIn(filePath);
     if (!fileIn.is_open()) {
         console.error("File cannot be opened!");
@@ -43,12 +42,10 @@ string readFile(const string& filePath)
     return buffer.str();
 }
 
-bool writeFile(const string& str, const string& filePath, bool dryRun,
-    bool verbose)
-{
+bool writeFile(const string &str, const string &filePath, bool dryRun, bool verbose) {
     if (dryRun) {
         // Log what would be done, but don't actually do anything
-        console.logLn("Would write string to file: " + filePath, { YELLOW });
+        console.logLn("Would write string to file: " + filePath, {YELLOW});
         return true; // Indicate success
     }
 
@@ -73,12 +70,10 @@ bool writeFile(const string& str, const string& filePath, bool dryRun,
     return true;
 }
 
-void copyFile(const fs::path& src, const string& fileName,
-    const fs::path& dest)
-{
+void copyFile(const fs::path &src, const string &fileName, const fs::path &dest) {
     try {
         // Iterate through the source directory
-        for (const auto& entry : fs::directory_iterator(src)) {
+        for (const auto &entry : fs::directory_iterator(src)) {
             // Check if the current entry is a file and matches the fileName without
             // considering the extension
             if (entry.is_regular_file() && entry.path().stem() == fileName) {
@@ -86,21 +81,32 @@ void copyFile(const fs::path& src, const string& fileName,
                 fs::path destPath = dest / entry.path().filename();
                 // Copy the file
                 fs::copy(entry.path(), destPath, fs::copy_options::recursive);
-                std::cout << "Copied: " << entry.path() << " to " << destPath
-                          << std::endl;
+                std::cout << "Copied: " << entry.path() << " to " << destPath << std::endl;
                 return; // File found and copied, exit the function
             }
         }
-    } catch (const std::exception& e) {
+    } catch (const std::exception &e) {
         console.error("Error while copying resource: " + string(e.what()));
         return;
     }
 }
 
-string fileFindReplace(const string& filePath,
-    const string& oldString,
-    const string& newString)
-{
+bool copyFileT(const fs::path &srcPath, const fs::path &destPath) {
+    try {
+        if (!fs::exists(srcPath) || !fs::is_regular_file(srcPath)) {
+            console.error(srcPath.generic_string() + ": source file not found");
+        }
+
+        fs::create_directories(destPath.parent_path()); // make the folders
+        fs::copy_file(srcPath, destPath, fs::copy_options::overwrite_existing);
+        return true;
+
+    } catch (const std::exception &e) {
+        return false;
+    }
+}
+
+string fileFindReplace(const string &filePath, const string &oldString, const string &newString) {
     string fileContent = readFile(filePath);
 
     size_t pos = fileContent.find(oldString);
@@ -115,11 +121,9 @@ string fileFindReplace(const string& filePath,
 #pragma region // FILE VALIDATION
 
 // Returns true if path has a known text file extension
-bool isTextFile(const fs::path& path)
-{
+bool isTextFile(const fs::path &path) {
     static const std::unordered_set<std::string> textExts = {
-        ".c", ".cpp", ".h", ".hpp", ".c", ".txt", ".md", ".json", ".codeframe"
-    };
+        ".c", ".cpp", ".h", ".hpp", ".c", ".txt", ".md", ".json", ".codeframe", ".asm", ".s"};
 
     auto ext = path.extension().string();
 

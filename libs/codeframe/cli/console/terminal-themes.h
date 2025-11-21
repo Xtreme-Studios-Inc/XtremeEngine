@@ -5,16 +5,16 @@
 #include <string>
 
 #include <core/base.h>
-#include <string/string.h>
+#include <string-util/string.h>
 
 #include <theme/color.h>
 
 using std::optional;
 
-string toConsoleFG(const rgb& color, bool bold = false);
-string toConsoleBG(const rgb& color);
+string toConsoleFG(const rgb &color, bool bold = false);
+string toConsoleBG(const rgb &color);
 
-string tColor(const rgb& fg, const optional<rgb>& bg = std::nullopt);
+string tColor(const rgb &fg, const optional<rgb> &bg = std::nullopt);
 
 // TEXT EFFECTS
 const string NORMAL = "0";
@@ -61,13 +61,13 @@ const string SHOW_CURSOR = "\033[?25h";
 const string SAVE_CURSOR = "\033[s";
 const string RESTORE_CURSOR = "\033[u";
 
-string white(const string& str);
-string gray(const string& str);
-string red(const string& str);
-string green(const string& str, bool bold = false);
-string yellow(const string& str);
-string blue(const string& str);
-string cyan(const string& str);
+string white(const string &str);
+string gray(const string &str);
+string red(const string &str);
+string green(const string &str, bool bold = false);
+string yellow(const string &str);
+string blue(const string &str);
+string cyan(const string &str);
 
 void printPalette();
 

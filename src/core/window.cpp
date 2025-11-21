@@ -1,14 +1,19 @@
 #include "window.h"
 
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include <backends/imgui_impl_opengl3_loader.h>
 
 Window::Window() {
 #pragma region // Console
+    // Only run this console window manipulation on Windows
+#ifdef _WIN32
     //::ShowWindow(::GetConsoleWindow(), SW_HIDE);
     //::ShowWindow(::GetConsoleWindow(), SW_MINIMIZE); //Still visible in the task bar
     ::ShowWindow(::GetConsoleWindow(), SW_SHOW);
-//::IsWindowVisible(::GetConsoleWindow()) != FALSE;
+    //::IsWindowVisible(::GetConsoleWindow()) != FALSE;
+#endif
 #pragma endregion
 
     mainWindow = nullptr;

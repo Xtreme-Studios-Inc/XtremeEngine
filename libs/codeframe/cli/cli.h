@@ -9,15 +9,14 @@
 #include "console/console.h"
 
 struct ParsedCommand {
-    string cmd;
-    vector<string> args;
+  string cmd;
+  vector<string> args;
 };
 
 vector<string> getCommand();
-ParsedCommand parseCommand(vector<string>& args);
+ParsedCommand parseCommand(vector<string> &args);
 
 // MENUS
 
-void helpMenu(const vector<CommandDefinition>& commands,
-    const optional<rgb>& primary = MAGENTA,
-    const optional<rgb>& secondary = std::nullopt);
+void helpMenu(const vector<CommandDefinition> &commands, const optional<rgb> &primary = MAGENTA,
+              const optional<rgb> &secondary = std::nullopt);

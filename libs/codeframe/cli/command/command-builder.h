@@ -6,36 +6,45 @@
 namespace fs = std::filesystem;
 
 #include "../../core/base.h"
-#include "../../string/string.h"
+#include "../../string-util/string.h"
 
 class CommandBuilder {
-public:
+  public:
     CommandBuilder() = default;
     ~CommandBuilder() = default;
 
+    string flagChar = "-";
+
     // Command
-    const string& getCmd();
-    void setCmd(string& cmd);
+    const string &getCmd();
+    void setCmd(string &cmd);
 
     // Current Working Directory
-    const string& getCwd();
-    void setCwd(string& cwd);
+    const string &getCwd();
+    void setCwd(string &cwd);
 
-    void addSegment(const string& segment);
-    void addPath(const fs::path& path);
-    void addFlag(const string& flag);
-    void addKeyValue(const string& key, const string& value);
+    void addSegment(const string &segment);
+    void addPath(const fs::path &path);
+    void addFlag(const string &flag);
+    void addKeyValue(const string &key, const string &value);
 
-    void addRelativeResource(const string& value);
+    void addRelativeResource(const string &value);
 
-private:
-    enum class CommandTokenType {
-        Segment,
-        Path,
-        Flag,
-        KeyValue,
-        RelativeResource
-    };
+    void reset(bool keepCwd = true) {
+        std::string oldCwd;
+        if (keepCwd)
+            oldCwd = std::move(cwd);
+        cmd.clear();
+        tokens.clear();
+        dirty = true;
+        if (!keepCwd)
+            cwd.clear();
+        else
+            cwd = std::move(oldCwd);
+    }
+
+  private:
+    enum class CommandTokenType { Segment, Path, Flag, KeyValue, RelativeResource };
 
     struct CommandToken {
         CommandTokenType type;
@@ -44,11 +53,11 @@ private:
     };
 
     // Command to be executed
-    string cmd { "" };
+    string cmd{""};
     bool dirty = true;
 
     // Current working directory, all relative links wil be relative to this
-    string cwd { "" };
+    string cwd{""};
 
     vector<CommandToken> tokens;
 

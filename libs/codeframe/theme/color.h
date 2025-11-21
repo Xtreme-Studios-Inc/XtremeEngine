@@ -9,14 +9,9 @@
 // Usage:          Used for color representation in visuals and styling
 // ─────────────────────────────────────────────────────────────
 struct rgb {
-    uint8_t r, g, b;
+  uint8_t r, g, b;
 
-    rgb(uint8_t r, uint8_t g, uint8_t b)
-        : r(r)
-        , g(g)
-        , b(b)
-    {
-    }
+  rgb(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {}
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -28,23 +23,11 @@ struct rgb {
 // Defaults:       Alpha defaults to 255 (fully opaque)
 // ─────────────────────────────────────────────────────────────
 struct rgba {
-    uint8_t r, g, b, a;
+  uint8_t r, g, b, a;
 
-    rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
-        : r(r)
-        , g(g)
-        , b(b)
-        , a(a)
-    {
-    }
+  rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : r(r), g(g), b(b), a(a) {}
 
-    rgba(const rgb& color, uint8_t a = 255)
-        : r(color.r)
-        , g(color.g)
-        , b(color.b)
-        , a(a)
-    {
-    }
+  rgba(const rgb &color, uint8_t a = 255) : r(color.r), g(color.g), b(color.b), a(a) {}
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -116,9 +99,9 @@ const rgb ORCHID_DARK(114, 44, 132);
 // Description:    Rich, expressive tones used to highlight or brand.
 // Usage:          Apply in tags, labels, themes, or non-core status elements.
 // ─────────────────────────────────────────────────────────────
-const rgb GOLD(255, 215, 0); // Royal or award highlight
-const rgb LIME(191, 255, 0); // Vibrant and energetic lime green
-const rgb INDIGO(75, 0, 130); // Deep spiritual purple-blue
+const rgb GOLD(255, 215, 0);   // Royal or award highlight
+const rgb LIME(191, 255, 0);   // Vibrant and energetic lime green
+const rgb INDIGO(75, 0, 130);  // Deep spiritual purple-blue
 const rgb PINK(255, 105, 180); // Friendly, expressive tone
 const rgb VIOLET(143, 0, 255);
 const rgb OLIVE(128, 128, 0);
@@ -135,4 +118,4 @@ const rgb COLOR_WARNING = YELLOW;
 const rgb COLOR_ERROR = RED;
 const rgb COLOR_INFO = CYAN;
 
-constexpr const char8_t* BLOCK = u8"\u2588";
+constexpr const char8_t *BLOCK = u8"\u2588";

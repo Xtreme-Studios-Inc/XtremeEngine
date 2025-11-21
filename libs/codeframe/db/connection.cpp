@@ -1,6 +1,7 @@
 // #include "connection.h"
 
-// ConnectionResult Connection::connect(const string& dbType, const string& host, int port)
+// ConnectionResult Connection::connect(const string& dbType, const string&
+// host, int port)
 // {
 //     ConnectionResult result;
 //     result.status = ConnectionStatus::Connecting;

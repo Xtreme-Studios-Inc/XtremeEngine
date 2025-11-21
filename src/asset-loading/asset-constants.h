@@ -2,4 +2,4 @@
 
 #include <codeframe>
 
-const fs::path ASSETS = fs::current_path() / "assets";
+const fs::path ASSETS = getExecutableDir() / "assets";
